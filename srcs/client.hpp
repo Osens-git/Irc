@@ -6,7 +6,7 @@
 /*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 17:12:39 by vluo              #+#    #+#             */
-/*   Updated: 2025/11/15 12:02:32 by vluo             ###   ########.fr       */
+/*   Updated: 2025/11/17 17:57:01 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,8 @@
 #include <netdb.h>
 #include <cstdio>
 #include <errno.h>
+#include <arpa/inet.h>
+
 
 class Client
 {
@@ -51,5 +53,7 @@ class Client
 		std::string	get_usrname() 	const;
 		int			get_ch_id() 	const;
 		int			get_ch_right() 	const;
+		int			get_fd() 		const;
+		int			get_id()		const;
 		
 };

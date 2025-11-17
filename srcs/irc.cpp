@@ -6,7 +6,7 @@
 /*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 18:50:29 by vluo              #+#    #+#             */
-/*   Updated: 2025/11/17 13:06:13 by vluo             ###   ########.fr       */
+/*   Updated: 2025/11/17 19:30:52 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,38 +24,47 @@ int	check_args(char **argv){
 	return (1);
 }
 
-int	add_client(std::deque<Client> &clients, std::vector<int> fds)
+int	add_client(std::vector<Client *> &clients, std::vector<int> &fds)
 {
-	Client c(clients.size(), fds[0]);
-	std::cout << "client username" << clients[0].get_usrname() << std::endl;
-	std::cout << "client nickname" << clients[0].get_nick() << std::endl;
+
+	Client *c = new Client (clients.size(), fds[0]);
+	std::cout << "Client " << c->get_fd() << " connected to server" <<std::endl;
+	// std::cout << "client username: " << c->get_usrname() << std::endl;
+	// std::cout << "client nickname: " << c->get_nick() << std::endl;
 	clients.push_back(c);
+	fds.push_back(c->get_fd());
+
 	return (1);
 }
 
+
+
 int	handle_client(Server &serv){
 
-	std::deque<Client>	clients;
-	std::vector<int>	fds;
-	fd_set read_fd;
-	fd_set write_fd;
+	FD_SET(serv.get_sock(), &serv.read_fd);
+	FD_SET(serv.get_sock(), &serv.write_fd);
 
-	fds.push_back(serv.get_sock());
-	std::cout << "handle client " << std::endl;
+	serv.fds.push_back(serv.get_sock());
 	while (1)
 	{
-		FD_ZERO(&read_fd);
-		int	sel = select(1, &read_fd, &write_fd, NULL, NULL);
+		int	sel = select(FD_SETSIZE, &serv.read_fd, &serv.write_fd, NULL, NULL);
 		if (sel > 0){
-			for(std::size_t i = 0; i < fds.size(); i ++)
+			for(std::size_t i = 0; i < serv.fds.size(); i ++)
 			{
-				if (fds[i] > 0 && FD_ISSET(fds[i], &read_fd))
+				if (serv.fds[i] > 0 && FD_ISSET(serv.fds[i], &serv.read_fd))
 				{
 					if (i == 0) // new client
 					{
-						std::cout << "HELLO" << std::endl;
-						add_client(clients, fds);
-						// break ;
+						add_client(serv.clients, serv.fds);
+						// std::cout << "C FDS: ";
+						// for (unsigned long i = 0; i < clients.size(); i ++)
+						// 	std::cout << clients[i]->get_fd() << " ";
+						// std::cout << std::endl;
+
+						// std::cout << "FDS: ";
+						// for (unsigned long i = 0; i < fds.size(); i ++)
+						// 	std::cout << fds[i] << " ";
+						// std::cout << std::endl;
 					}
 					else // messsage
 						// handle_mes(clients, fds[i]);

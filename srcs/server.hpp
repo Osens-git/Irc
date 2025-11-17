@@ -6,11 +6,13 @@
 /*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/30 14:55:36 by vluo              #+#    #+#             */
-/*   Updated: 2025/11/03 16:33:13 by vluo             ###   ########.fr       */
+/*   Updated: 2025/11/17 19:23:57 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
+
+#include "client.hpp"
 
 #include <netinet/in.h>
 #include <string>
@@ -18,6 +20,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <cstdlib>
+#include <vector>
 
 class Server {
 	
@@ -36,6 +39,11 @@ class Server {
 	
 		Server(char **argv);
 		~Server();
+
+		std::vector<Client *>	clients;
+		std::vector<int>		fds;
+		fd_set 					read_fd;
+		fd_set 					write_fd;
 
 		int					get_sock() const;
 		sockaddr_in 		get_hint() const;

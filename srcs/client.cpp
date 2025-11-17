@@ -6,7 +6,7 @@
 /*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 17:12:06 by vluo              #+#    #+#             */
-/*   Updated: 2025/11/15 12:14:45 by vluo             ###   ########.fr       */
+/*   Updated: 2025/11/17 19:02:04 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,19 +38,11 @@ Client::Client(int id, int server_fd) : _id(id) {
 	/* Set the new socket to non-blocking */
 	fcntl(_fd, F_SETFL, O_NONBLOCK);
 
-	char user[5] = "User";
-	char nick[14] = "User_Nickname";
-	int info = getaddrinfo(user, nick, NULL, NULL);
-	if (info != 0)
-		std::cerr << "Could not get client info" << std::endl;
-	_username = user;
-	_nickmane = nick;
+	set_username(inet_ntoa(cl.sin_addr));
+	set_nick(inet_ntoa(cl.sin_addr));
 	set_ch_id(0);
 	set_ch_id(0);
 
-	std::cout << get_usrname() << std::endl;
-	std::cout << get_nick() << std::endl;
-	
 }
 Client::~Client(){}
 
@@ -63,3 +55,5 @@ std::string Client::get_nick() const { return (_nickmane); }
 std::string Client::get_usrname() const { return (_username); }
 int 		Client::get_ch_id() const { return (_ch_id); }
 int 		Client::get_ch_right() const { return (_ch_right); }
+int			Client::get_fd() const { return (_fd); }
+int			Client::get_id() const { return (_id); }

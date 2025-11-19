@@ -6,7 +6,7 @@
 /*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/30 14:55:36 by vluo              #+#    #+#             */
-/*   Updated: 2025/11/17 19:23:57 by vluo             ###   ########.fr       */
+/*   Updated: 2025/11/19 15:24:06 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,5 +49,7 @@ class Server {
 		sockaddr_in 		get_hint() const;
 		int			 		get_port() const;
 		std::string	const 	get_pawd() const;
+
+		int					add_client();
 
 };

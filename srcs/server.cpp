@@ -6,14 +6,13 @@
 /*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/30 15:02:51 by vluo              #+#    #+#             */
-/*   Updated: 2025/11/17 19:26:41 by vluo             ###   ########.fr       */
+/*   Updated: 2025/11/19 15:30:03 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "server.hpp"
-#include <netdb.h>
 
-Server::Server(char **argv) : _pawd(argv[2]){
+Server::Server(char **argv) :_pawd(argv[2]){
 
 	struct protoent *pe = getprotobyname("tcp");
 	_sock = socket(AF_INET, SOCK_STREAM, pe->p_proto);
@@ -73,3 +72,14 @@ int	Server::get_sock() const { return _sock; }
 sockaddr_in Server::get_hint() const { return _hint; }
 int Server::get_port() const { return _port; }
 std::string const Server::get_pawd() const { return _pawd; }
+
+int	Server::add_client()
+{
+	Client *c = new Client (_sock);
+	if (c->get_fd() < 0)
+		return (-1);
+	std::cout << "Client " << c->get_fd() << " connected to server" <<std::endl;
+	clients.push_back(c);
+	fds.push_back(c->get_fd());
+	return (1);
+}

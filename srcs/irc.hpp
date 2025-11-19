@@ -6,11 +6,14 @@
 /*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 18:50:55 by vluo              #+#    #+#             */
-/*   Updated: 2025/11/03 16:33:10 by vluo             ###   ########.fr       */
+/*   Updated: 2025/11/19 15:12:00 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
+
+#include "client.hpp"
+#include "server.hpp"
 
 #include <cstring>
 #include <iostream>
@@ -22,7 +25,6 @@
 #include <deque>
 #include <vector>
 #include <fcntl.h>
-
-#include "client.hpp"
+#include <csignal>
 
 

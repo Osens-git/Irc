@@ -6,7 +6,7 @@
 /*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 17:12:39 by vluo              #+#    #+#             */
-/*   Updated: 2025/11/17 17:57:01 by vluo             ###   ########.fr       */
+/*   Updated: 2025/11/19 15:28:05 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,8 @@
 #include <cstdio>
 #include <errno.h>
 #include <arpa/inet.h>
+// #include <cstdlib>
+// #include <stdlib.h>
 
 
 class Client
@@ -30,7 +32,7 @@ class Client
 
 		Client &operator=(Client const &);
 	
-		int 			_id; // arbitrary or not (like index 0 to nb_users or whatever he is identified by)
+		// int 			_id; // arbitrary or not (like index 0 to nb_users or whatever he is identified by)
 		int				_fd;
 		std::string		_nickmane;
 		std::string		_username;
@@ -41,7 +43,7 @@ class Client
 
 		Client();
 		Client(Client const &);
-		Client(int id, int serv_fd);
+		Client(int serv_fd);
 		~Client();
 	
 		void	set_nick(std::string const);

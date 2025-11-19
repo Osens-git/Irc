@@ -6,7 +6,7 @@
 /*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 17:12:06 by vluo              #+#    #+#             */
-/*   Updated: 2025/11/17 19:02:04 by vluo             ###   ########.fr       */
+/*   Updated: 2025/11/19 15:28:13 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 Client::Client(){}
 Client::Client(Client const &){} 
 
-Client::Client(int id, int server_fd) : _id(id) {
+Client::Client(int server_fd) {
 	
 	sockaddr_in cl;
 	int cl_size = sizeof(struct sockaddr_in);
@@ -30,7 +30,6 @@ Client::Client(int id, int server_fd) : _id(id) {
 		}
 		else {
 			perror("Could not accept connection");
-			_fd = -1;
 			return ;
 		}
 	} 
@@ -39,7 +38,7 @@ Client::Client(int id, int server_fd) : _id(id) {
 	fcntl(_fd, F_SETFL, O_NONBLOCK);
 
 	set_username(inet_ntoa(cl.sin_addr));
-	set_nick(inet_ntoa(cl.sin_addr));
+	set_nick(_username);
 	set_ch_id(0);
 	set_ch_id(0);
 
@@ -56,4 +55,4 @@ std::string Client::get_usrname() const { return (_username); }
 int 		Client::get_ch_id() const { return (_ch_id); }
 int 		Client::get_ch_right() const { return (_ch_right); }
 int			Client::get_fd() const { return (_fd); }
-int			Client::get_id() const { return (_id); }
+// int			Client::get_id() const { return (_id); }

@@ -6,7 +6,7 @@
 /*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 18:50:29 by vluo              #+#    #+#             */
-/*   Updated: 2025/11/19 15:45:08 by vluo             ###   ########.fr       */
+/*   Updated: 2025/11/19 17:38:45 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,37 +25,59 @@ int	check_args(char **argv){
 	return (1);
 }
 
-void	handle_client(Server &serv){
+void	handle_mes(Server &serv, int fd)
+{
+	std::string mes;
 
-	FD_SET(serv.get_sock(), &serv.read_fd);
-	FD_SET(serv.get_sock(), &serv.write_fd);
-
-	serv.fds.push_back(serv.get_sock());
-	while (!g_signal)
+	while (1)
 	{
-		int	sel = select(FD_SETSIZE, &serv.read_fd, &serv.write_fd, NULL, NULL);
-		if (sel > 0){
-			for(std::size_t i = 0; i < serv.fds.size(); i ++)
-			{
-				if (serv.fds[i] > 0 && FD_ISSET(serv.fds[i], &serv.read_fd))
-				{
-					if (i == 0) // new client
-						serv.add_client();
-					else // messsage
-						// handle_mes(clients, fds[i]);
-						break ;
-				}
-			}
+		int	read_val = recv(fd, serv.get_client(fd)->buf, BUFFER_SIZE, 0);
+		if (read_val <= 0)
+		{
+			std::cout << "Client " << fd << " disconnected" << std::endl;
+			serv.delete_client(fd);
+			return ;
+		}
+		else
+		{
+			break;
 		}
 	}
 }
+
+void	handle_client(Server &serv){
+
+	while (!g_signal)
+	{
+		fd_set rfd = serv.read_fd;
+		int i = 3;
+		int	sel = select(serv.max_fd + 1, &rfd, NULL, NULL, NULL);
+		while (sel > 0 && i <= serv.max_fd)
+		{			
+			if (i > 0 && FD_ISSET(i, &rfd))
+			{
+				if (i == serv.get_sock())
+				{
+					serv.add_client();
+					sel --;
+				}
+				else // messsage
+				{
+					handle_mes(serv, i);
+					sel --;
+				}
+			}
+			i ++;
+		}
+	}
+}
+
 
 void	handle_sig(int sig)
 {
 	g_signal = sig;
 	std::cout << std::endl;
 }
-
 
 int main(int argc, char **argv)
 {
@@ -70,9 +92,8 @@ int main(int argc, char **argv)
 	Server serv(argv);
 	if (serv.get_sock() == -1)
 		return (-1);
-
-	handle_client(serv);
 	
-	close(serv.get_sock());
+	handle_client(serv);
+
 	return (0);
 }

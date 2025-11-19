@@ -6,13 +6,13 @@
 /*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/30 15:02:51 by vluo              #+#    #+#             */
-/*   Updated: 2025/11/19 15:30:03 by vluo             ###   ########.fr       */
+/*   Updated: 2025/11/19 17:46:05 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "server.hpp"
 
-Server::Server(char **argv) :_pawd(argv[2]){
+Server::Server(char **argv) :_pawd(argv[2]), max_fd(3){
 
 	struct protoent *pe = getprotobyname("tcp");
 	_sock = socket(AF_INET, SOCK_STREAM, pe->p_proto);
@@ -37,7 +37,7 @@ Server::Server(char **argv) :_pawd(argv[2]){
 		_sock = -1;
 		return ;
 	}
-	
+
 	if (listen(_sock, SOMAXCONN) == -1)
 	{
 		close(_sock);
@@ -46,7 +46,7 @@ Server::Server(char **argv) :_pawd(argv[2]){
 		_sock = -1;
 		return ;
 	}
-			
+
 	fcntl(_sock, F_SETFL, O_NONBLOCK);
 	if (_sock == -1)
 	{
@@ -55,7 +55,7 @@ Server::Server(char **argv) :_pawd(argv[2]){
 	}
 
 	FD_ZERO(&read_fd);
-	FD_ZERO(&write_fd);
+	FD_SET(_sock, &read_fd);
 
 	std::cout << "listening on port :" << _port << std::endl;
 }
@@ -63,8 +63,13 @@ Server::~Server(){
 	std::cout << "Server shutting down" << std::endl;
 
 	for(unsigned long i = 0; i < clients.size(); i ++)
+	{
+		FD_CLR(clients[i]->get_fd(), &read_fd);
+		close(clients[i]->get_fd());
 		delete clients[i];
-
+	}
+	if (_sock > 0)
+		close(_sock);
 }
 
 
@@ -79,7 +84,33 @@ int	Server::add_client()
 	if (c->get_fd() < 0)
 		return (-1);
 	std::cout << "Client " << c->get_fd() << " connected to server" <<std::endl;
+	
 	clients.push_back(c);
-	fds.push_back(c->get_fd());
+	
+	FD_SET(c->get_fd(), &read_fd);
+	if (c->get_fd() > max_fd)
+		max_fd = c->get_fd();
 	return (1);
+}
+
+void	Server::delete_client(int fd){
+
+	for(unsigned long i = 0 ; i < clients.size(); i ++)
+	{
+		if (clients[i]->get_fd() == fd)
+		{
+			close(fd);
+			FD_CLR(fd, &read_fd);
+			delete clients[i];
+			clients.erase(clients.begin() + i);
+			break;
+		}
+	}
+}
+
+Client *Server::get_client(int fd){
+	for(unsigned long i = 0; i < clients.size(); i ++)
+		if (clients[i]->get_fd() == fd)
+			return (clients[0]);
+	return (NULL);
 }

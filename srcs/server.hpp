@@ -6,7 +6,7 @@
 /*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/30 14:55:36 by vluo              #+#    #+#             */
-/*   Updated: 2025/11/19 15:24:06 by vluo             ###   ########.fr       */
+/*   Updated: 2025/11/19 17:27:20 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,9 +41,8 @@ class Server {
 		~Server();
 
 		std::vector<Client *>	clients;
-		std::vector<int>		fds;
+		int						max_fd;
 		fd_set 					read_fd;
-		fd_set 					write_fd;
 
 		int					get_sock() const;
 		sockaddr_in 		get_hint() const;
@@ -51,5 +50,7 @@ class Server {
 		std::string	const 	get_pawd() const;
 
 		int					add_client();
+		void				delete_client(int fd);
+		Client				*get_client(int fd);
 
 };

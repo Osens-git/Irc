@@ -6,7 +6,7 @@
 /*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 17:12:06 by vluo              #+#    #+#             */
-/*   Updated: 2025/11/19 17:47:24 by vluo             ###   ########.fr       */
+/*   Updated: 2025/11/19 17:49:48 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,8 +39,8 @@ Client::Client(int server_fd) {
 
 	set_username(inet_ntoa(cl.sin_addr));
 	set_nick(_username);
-	set_ch_id(0);
-	set_ch_id(0);
+	// set_ch_id(0);
+	// set_ch_id(0);
 
 }
 Client::~Client(){}

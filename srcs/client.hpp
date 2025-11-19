@@ -6,7 +6,7 @@
 /*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 17:12:39 by vluo              #+#    #+#             */
-/*   Updated: 2025/11/19 17:47:12 by vluo             ###   ########.fr       */
+/*   Updated: 2025/11/19 17:49:34 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,8 +51,8 @@ class Client
 	
 		void	set_nick(std::string const);
 		void	set_username(std::string const);
-		void	set_ch_id(int const);
-		void	set_ch_right(int const);
+		// void	set_ch_id(int const);
+		// void	set_ch_right(int const);
 
 		std::string	get_nick() 		const;
 		std::string	get_usrname() 	const;

@@ -6,7 +6,7 @@
 /*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/30 15:02:51 by vluo              #+#    #+#             */
-/*   Updated: 2025/11/19 17:46:05 by vluo             ###   ########.fr       */
+/*   Updated: 2025/11/19 18:12:04 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,10 +57,10 @@ Server::Server(char **argv) :_pawd(argv[2]), max_fd(3){
 	FD_ZERO(&read_fd);
 	FD_SET(_sock, &read_fd);
 
-	std::cout << "listening on port :" << _port << std::endl;
+	std::cout << "ircserv: Listening on port : <" << _port << ">" << std::endl;
 }
 Server::~Server(){
-	std::cout << "Server shutting down" << std::endl;
+	std::cout << "ircserv: Server shutting down" << std::endl;
 
 	for(unsigned long i = 0; i < clients.size(); i ++)
 	{
@@ -81,15 +81,20 @@ std::string const Server::get_pawd() const { return _pawd; }
 int	Server::add_client()
 {
 	Client *c = new Client (_sock);
-	if (c->get_fd() < 0)
+	if (c->get_fd() < 0 || c == NULL)
+	{
+		if (c == NULL)
+			std::cerr << "Error: Failed to allocate \
+				new memory for client" << std::endl;
 		return (-1);
-	std::cout << "Client " << c->get_fd() << " connected to server" <<std::endl;
-	
+	}
+		
+	std::cout << "ircserv: Client " << c->get_fd() << " connected to server" <<std::endl;
 	clients.push_back(c);
-	
 	FD_SET(c->get_fd(), &read_fd);
 	if (c->get_fd() > max_fd)
 		max_fd = c->get_fd();
+
 	return (1);
 }
 

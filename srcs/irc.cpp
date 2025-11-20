@@ -6,7 +6,7 @@
 /*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 18:50:29 by vluo              #+#    #+#             */
-/*   Updated: 2025/11/19 17:38:45 by vluo             ###   ########.fr       */
+/*   Updated: 2025/11/20 19:47:19 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,23 +25,37 @@ int	check_args(char **argv){
 	return (1);
 }
 
-void	handle_mes(Server &serv, int fd)
+void	handle_mes(Server &serv, int fd, int read_val)
 {
-	std::string mes;
-
+	std::string msg(serv.get_client(fd)->buf, serv.get_client(fd)->buf + read_val);
+	std::string line = "";
 	while (1)
 	{
+		line = line + msg;
 		int	read_val = recv(fd, serv.get_client(fd)->buf, BUFFER_SIZE, 0);
 		if (read_val <= 0)
 		{
-			std::cout << "Client " << fd << " disconnected" << std::endl;
-			serv.delete_client(fd);
+			std::cout << line;
+			send(fd, (line.c_str()), line.size(), 0);
 			return ;
 		}
-		else
-		{
-			break;
-		}
+		std::string msg(serv.get_client(fd)->buf, serv.get_client(fd)->buf + read_val);
+		line = line + msg;
+	}
+}
+
+void	handle_input(Server &serv, int fd)
+{
+	int	read_val = recv(fd, serv.get_client(fd)->buf, BUFFER_SIZE, 0); 
+	if (read_val <= 0)
+	{
+		std::cout << "ircserv: Client " << fd << " disconnected" << std::endl;
+		serv.delete_client(fd);
+		return ;
+	}
+	else
+	{
+		handle_mes(serv, fd, read_val);
 	}
 }
 
@@ -63,7 +77,7 @@ void	handle_client(Server &serv){
 				}
 				else // messsage
 				{
-					handle_mes(serv, i);
+					handle_input(serv, i);
 					sel --;
 				}
 			}
@@ -85,7 +99,7 @@ int main(int argc, char **argv)
 	signal(SIGQUIT, &handle_sig);
 
 	if (argc != 3 )
-		return (std::cerr << "Error: Wrong number of arguments" << std::endl, -1);
+		return (std::cerr << "Usage: ./ircserv <port> <password." << std::endl, -1);
 	if (!check_args(argv))
 		return (-1);
 

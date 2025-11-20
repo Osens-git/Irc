@@ -6,7 +6,7 @@
 /*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 17:12:06 by vluo              #+#    #+#             */
-/*   Updated: 2025/11/19 17:49:48 by vluo             ###   ########.fr       */
+/*   Updated: 2025/11/19 19:32:55 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,17 +24,10 @@ Client::Client(int server_fd) {
 		(socklen_t*)&cl_size);
 
 	if (_fd == -1) {
-		/* We have processed all incoming connections. */
-		if ((errno == EAGAIN) || (errno == EWOULDBLOCK)) {
-			return ;
-		}
-		else {
-			perror("Could not accept connection");
-			return ;
-		}
+		std::cerr << "Error: Could not accept connection" << std::endl;
+		return ;
 	} 
 
-	/* Set the new socket to non-blocking */
 	fcntl(_fd, F_SETFL, O_NONBLOCK);
 
 	set_username(inet_ntoa(cl.sin_addr));

@@ -6,7 +6,7 @@
 /*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 18:50:29 by vluo              #+#    #+#             */
-/*   Updated: 2025/11/20 19:47:19 by vluo             ###   ########.fr       */
+/*   Updated: 2025/11/21 15:25:17 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,28 +25,35 @@ int	check_args(char **argv){
 	return (1);
 }
 
-void	handle_mes(Server &serv, int fd, int read_val)
+void	handle_mes(Server &serv, int fd, int read_val, char *buf)
 {
-	std::string msg(serv.get_client(fd)->buf, serv.get_client(fd)->buf + read_val);
-	std::string line = "";
-	while (1)
+	std::string line(buf, buf + read_val);
+
+	int	rl = recv(fd, buf, BUFFER_SIZE, 0);
+	while (rl > 0)
 	{
-		line = line + msg;
-		int	read_val = recv(fd, serv.get_client(fd)->buf, BUFFER_SIZE, 0);
-		if (read_val <= 0)
-		{
-			std::cout << line;
-			send(fd, (line.c_str()), line.size(), 0);
-			return ;
-		}
-		std::string msg(serv.get_client(fd)->buf, serv.get_client(fd)->buf + read_val);
-		line = line + msg;
+		line += std::string(buf, buf + rl);
+		rl = recv(fd, buf, BUFFER_SIZE, 0);
 	}
+
+	Client *cli = serv.get_client(fd);
+
+	if (line.find('\n') != std::string::npos)
+	{
+		std::cout << cli->buf + line;
+		send(fd, (cli->buf + line).c_str(), cli->buf.size() + line.size(), 0);
+		cli->buf.clear();
+		return ;
+	}
+	if (read_val > 0)
+		cli->buf.append(line);
 }
 
 void	handle_input(Server &serv, int fd)
 {
-	int	read_val = recv(fd, serv.get_client(fd)->buf, BUFFER_SIZE, 0); 
+	char buf[BUFFER_SIZE];
+
+	int	read_val = recv(fd, buf, BUFFER_SIZE, 0);
 	if (read_val <= 0)
 	{
 		std::cout << "ircserv: Client " << fd << " disconnected" << std::endl;
@@ -55,7 +62,7 @@ void	handle_input(Server &serv, int fd)
 	}
 	else
 	{
-		handle_mes(serv, fd, read_val);
+		handle_mes(serv, fd, read_val, buf);
 	}
 }
 
@@ -68,7 +75,7 @@ void	handle_client(Server &serv){
 		int	sel = select(serv.max_fd + 1, &rfd, NULL, NULL, NULL);
 		while (sel > 0 && i <= serv.max_fd)
 		{			
-			if (i > 0 && FD_ISSET(i, &rfd))
+			if (FD_ISSET(i, &rfd))
 			{
 				if (i == serv.get_sock())
 				{

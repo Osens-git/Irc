@@ -6,7 +6,7 @@
 /*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 17:12:39 by vluo              #+#    #+#             */
-/*   Updated: 2025/11/19 17:49:34 by vluo             ###   ########.fr       */
+/*   Updated: 2025/11/21 14:21:27 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@
 // #include <cstdlib>
 // #include <stdlib.h>
 
-#define BUFFER_SIZE 4096
+#define BUFFER_SIZE 1
 
 
 class Client
@@ -35,7 +35,7 @@ class Client
 		Client &operator=(Client const &);
 
 		int				_fd;
-		std::string		_nickmane;
+		std::string		_nickname;
 		std::string		_username;
 		// int				_ch_id;		// channel id where the user is in (0 if not in any) , ...
 		// int				_ch_right;	// ch_right 0 = operator, ch_right 1 = normal user , ...
@@ -47,7 +47,7 @@ class Client
 		Client(int serv_fd);
 		~Client();
 
-		char	buf[BUFFER_SIZE];
+		std::string	buf;
 	
 		void	set_nick(std::string const);
 		void	set_username(std::string const);

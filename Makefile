@@ -30,28 +30,6 @@ clean :
 fclean : clean
 	rm -rf $(NAME)
 
-re : fclean all
+re : fclean all 
 
-# Git operations
-push:
-	@git add .
-	@echo -n "$(BLUE)Enter your commit message for CPP Module 09: $(END)"
-	@read commit_message; \
-	git commit -m "CPP09: $$commit_message"; \
-	git push; \
-	echo "$(YELLOW)📤 All CPP Module 09 has been pushed with 'CPP09: $$commit_message'$(END)"
-
-save:
-	@git add .
-	@git status --porcelain | grep -q . && { \
-		echo -n "$(BLUE)Enter your commit message for CPP Module 09: $(END)"; \
-		read commit_message; \
-		git commit -m "CPP09: $$commit_message"; \
-		echo "$(GREEN)💾 Changes saved locally with 'CPP09: $$commit_message'$(END)"; \
-	} || echo "$(YELLOW)ℹ️  No changes to commit$(END)"
-
-push-force: save
-	@git push
-	@echo "$(GREEN)📤 Pushed to remote repository$(END)"%  
-
-.PHONY : all clean fclean re push save push-force
+.PHONY : all clean fclean re

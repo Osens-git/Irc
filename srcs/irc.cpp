@@ -6,7 +6,7 @@
 /*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 18:50:29 by vluo              #+#    #+#             */
-/*   Updated: 2025/11/21 16:35:53 by vluo             ###   ########.fr       */
+/*   Updated: 2025/11/22 17:54:16 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,54 @@ int	check_args(char **argv){
 	return (1);
 }
 
-void	handle_mes(Server &serv, int fd, int read_val, char *buf)
+std::vector<std::string> split_cmd(std::string cmds)
+{
+	int deb = 0;
+	unsigned long pos = cmds.find(' ');
+	std::vector<std::string> parse;
+	while (pos != std::string::npos)
+	{
+		parse.push_back(cmds.substr(deb, pos).c_str());
+		while (cmds[pos] && cmds[pos] == ' ')
+			pos ++;
+		deb = pos;
+		pos = cmds.find(' ', deb);;
+	}
+	parse.push_back(cmds.substr(deb, pos).c_str());
+	return (parse);
+}
+
+void	check_iscmd(Server &serv, Client *cli)
+{
+
+	int pos = cli->buf.find(' ');
+	std::string cmd = cli->buf.substr(0, pos);
+
+	if (cmd == "PASS" || cmd == "PASS\r\n")
+	{
+		std::cout << "PASS" << std::endl;
+		std::vector<std::string> str = split_cmd(cli->buf);
+		std::cout << "SIZE : " << str.size() << std::endl;
+		std::cout << "PARSING : ";
+		for (unsigned long i = 0; i < str.size(); i ++)
+			std::cout << "|" << str[i] << "| ";
+		std::cout << "END" << std::endl;
+	}
+	// if (cmd == "NICK")
+	// if (cmd == "USER")
+	// if (cmd == "PRIVMSG")
+	// if (cmd == "JOIN")
+	// if (cmd == "QUIT")
+	// if (cmd == "PART")
+	// if (cmd == "KICK")
+	// if (cmd == "INVITE")
+	// if (cmd == "TOPIC")
+	// if (cmd == "MODE")
+
+	return ;
+}
+
+void	handle_mes(Server &serv, int fd, int read_val, char *buf, Client *cli)
 {
 	std::string line(buf, buf + read_val);
 
@@ -36,12 +83,11 @@ void	handle_mes(Server &serv, int fd, int read_val, char *buf)
 		rl = recv(fd, buf, BUFFER_SIZE, 0);
 	}
 
-	Client *cli = serv.get_client(fd);
-
-	if (line.find('\n') != std::string::npos)
+	if (line.find("\r\n") != std::string::npos)
 	{
-		std::cout << cli->buf + line;
-		send(fd, (cli->buf + line).c_str(), cli->buf.size() + line.size(), 0);
+		cli->buf += line;
+		check_iscmd(serv, cli);
+		// send(fd, (cli->buf + line).c_str(), cli->buf.size() + line.size(), 0);
 		cli->buf.clear();
 		return ;
 	}
@@ -62,7 +108,7 @@ void	handle_input(Server &serv, int fd)
 	}
 	else
 	{
-		handle_mes(serv, fd, read_val, buf);
+		handle_mes(serv, fd, read_val, buf, serv.get_client(fd));
 	}
 }
 

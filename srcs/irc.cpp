@@ -6,7 +6,7 @@
 /*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 18:50:29 by vluo              #+#    #+#             */
-/*   Updated: 2025/11/22 17:54:16 by vluo             ###   ########.fr       */
+/*   Updated: 2025/11/23 16:36:38 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,18 +32,20 @@ std::vector<std::string> split_cmd(std::string cmds)
 	std::vector<std::string> parse;
 	while (pos != std::string::npos)
 	{
-		parse.push_back(cmds.substr(deb, pos).c_str());
+		parse.push_back(cmds.substr(deb, pos - deb));
 		while (cmds[pos] && cmds[pos] == ' ')
 			pos ++;
 		deb = pos;
 		pos = cmds.find(' ', deb);;
 	}
-	parse.push_back(cmds.substr(deb, pos).c_str());
+	parse.push_back(cmds.substr(deb, cmds.size() - deb - 2));
 	return (parse);
 }
 
 void	check_iscmd(Server &serv, Client *cli)
 {
+	if (cli->buf == "\r\n")
+		return ;
 
 	int pos = cli->buf.find(' ');
 	std::string cmd = cli->buf.substr(0, pos);
@@ -68,6 +70,8 @@ void	check_iscmd(Server &serv, Client *cli)
 	// if (cmd == "INVITE")
 	// if (cmd == "TOPIC")
 	// if (cmd == "MODE")
+
+	(void)serv;
 
 	return ;
 }

@@ -6,7 +6,7 @@
 /*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 18:50:55 by vluo              #+#    #+#             */
-/*   Updated: 2025/11/19 15:12:00 by vluo             ###   ########.fr       */
+/*   Updated: 2025/11/24 15:32:00 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,6 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <algorithm>
-#include <deque>
 #include <vector>
 #include <fcntl.h>
 #include <csignal>

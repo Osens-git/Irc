@@ -6,7 +6,7 @@
 /*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/30 15:02:51 by vluo              #+#    #+#             */
-/*   Updated: 2025/11/21 15:12:40 by vluo             ###   ########.fr       */
+/*   Updated: 2025/11/24 16:27:18 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,15 @@ Server::Server(char **argv) :_pawd(argv[2]), max_fd(3){
 	if (_sock == -1)
 	{
 		std::cerr << "Error: Cannot create listening socket" << std::endl;
+		return ;
+	}
+
+	const int opt = 1;
+	if(setsockopt(_sock, SOL_SOCKET, SO_REUSEADDR, (char *)&opt, sizeof(opt)) == -1)
+	{
+		std::cerr << "Error: Could not set socket options" << std::endl;
+		close(_sock);
+		_sock = -1;
 		return ;
 	}
 
@@ -64,8 +73,8 @@ Server::~Server(){
 
 	for(unsigned long i = 0; i < clients.size(); i ++)
 	{
-		FD_CLR(clients[i]->get_fd(), &read_fd);
 		close(clients[i]->get_fd());
+		FD_CLR(clients[i]->get_fd(), &read_fd);
 		delete clients[i];
 	}
 	if (_sock > 0)
@@ -116,9 +125,15 @@ void	Server::delete_client(int fd){
 	}
 }
 
-Client *Server::get_client(int fd){
+Client *Server::get_client_by_fd(int fd){
 	for(unsigned long i = 0; i < clients.size(); i ++)
 		if (clients[i]->get_fd() == fd)
+			return (clients[i]);
+	return (NULL);
+}
+Client *Server::get_client_by_nick(std::string nick){
+	for(unsigned long i = 0; i < clients.size(); i ++)
+		if (clients[i]->get_nick() == nick)
 			return (clients[i]);
 	return (NULL);
 }

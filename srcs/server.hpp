@@ -6,7 +6,7 @@
 /*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/30 14:55:36 by vluo              #+#    #+#             */
-/*   Updated: 2025/11/19 17:27:20 by vluo             ###   ########.fr       */
+/*   Updated: 2025/11/24 16:27:21 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,8 @@ class Server {
 
 		int					add_client();
 		void				delete_client(int fd);
-		Client				*get_client(int fd);
+
+		Client				*get_client_by_fd(int fd);
+		Client				*get_client_by_nick(std::string nick);
 
 };

@@ -6,12 +6,11 @@
 /*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 18:50:29 by vluo              #+#    #+#             */
-/*   Updated: 2025/11/23 16:36:38 by vluo             ###   ########.fr       */
+/*   Updated: 2025/11/24 18:03:59 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "irc.hpp"
-#include "server.hpp"
 
 int	g_signal = 0;
 
@@ -23,6 +22,16 @@ int	check_args(char **argv){
 	if (*p != 0)
 		return (std::cerr << "Error: " << argv[1] << " not valid port" << std::endl, -1);
 	return (1);
+}
+
+void	print_parse(std::vector<std::string> parse)
+{
+	std::cout << parse[0] << std::endl;
+	std::cout << "SIZE : " << parse.size() << std::endl;
+	std::cout << "PARSING : ";
+	for (unsigned long i = 0; i < parse.size(); i ++)
+		std::cout << "|" << parse[i] << "| ";
+	std::cout << "END" << std::endl;	
 }
 
 std::vector<std::string> split_cmd(std::string cmds)
@@ -38,7 +47,11 @@ std::vector<std::string> split_cmd(std::string cmds)
 		deb = pos;
 		pos = cmds.find(' ', deb);;
 	}
-	parse.push_back(cmds.substr(deb, cmds.size() - deb - 2));
+	if (cmds.size() - deb - 2 != 0)
+		parse.push_back(cmds.substr(deb, cmds.size() - deb - 2));
+
+	print_parse(parse);
+
 	return (parse);
 }
 
@@ -49,16 +62,11 @@ void	check_iscmd(Server &serv, Client *cli)
 
 	int pos = cli->buf.find(' ');
 	std::string cmd = cli->buf.substr(0, pos);
+	std::transform(cmd.begin(), cmd.end(), cmd.begin(), ::toupper);
 
 	if (cmd == "PASS" || cmd == "PASS\r\n")
 	{
-		std::cout << "PASS" << std::endl;
 		std::vector<std::string> str = split_cmd(cli->buf);
-		std::cout << "SIZE : " << str.size() << std::endl;
-		std::cout << "PARSING : ";
-		for (unsigned long i = 0; i < str.size(); i ++)
-			std::cout << "|" << str[i] << "| ";
-		std::cout << "END" << std::endl;
 	}
 	// if (cmd == "NICK")
 	// if (cmd == "USER")
@@ -91,12 +99,16 @@ void	handle_mes(Server &serv, int fd, int read_val, char *buf, Client *cli)
 	{
 		cli->buf += line;
 		check_iscmd(serv, cli);
+		std::cout << cli->buf << std::endl;
 		// send(fd, (cli->buf + line).c_str(), cli->buf.size() + line.size(), 0);
 		cli->buf.clear();
 		return ;
 	}
 	if (read_val > 0)
+	{
 		cli->buf.append(line);
+		std::cout << cli->buf << std::endl;
+	}
 }
 
 void	handle_input(Server &serv, int fd)
@@ -110,10 +122,7 @@ void	handle_input(Server &serv, int fd)
 		serv.delete_client(fd);
 		return ;
 	}
-	else
-	{
-		handle_mes(serv, fd, read_val, buf, serv.get_client(fd));
-	}
+	handle_mes(serv, fd, read_val, buf, serv.get_client_by_fd(fd));
 }
 
 void	handle_client(Server &serv){
@@ -128,21 +137,15 @@ void	handle_client(Server &serv){
 			if (FD_ISSET(i, &rfd))
 			{
 				if (i == serv.get_sock())
-				{
 					serv.add_client();
-					sel --;
-				}
 				else // messsage
-				{
 					handle_input(serv, i);
-					sel --;
-				}
+				sel --;
 			}
 			i ++;
 		}
 	}
 }
-
 
 void	handle_sig(int sig)
 {

@@ -6,7 +6,7 @@
 /*   By: cgelgon <cgelgon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/21 11:16:16 by cgelgon           #+#    #+#             */
-/*   Updated: 2025/11/21 13:50:37 by cgelgon          ###   ########.fr       */
+/*   Updated: 2025/11/26 14:25:13 by cgelgon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,6 +99,7 @@ bool Channel::setTopic(const std::string& _topic, int fd)
 bool Channel::setKey(const std::string& _key)
 {
 	key = _key;
+	return true;
 }
 
 void Channel::setInviteOnly(bool value)
@@ -117,7 +118,7 @@ void Channel::setUserLimit(size_t limit)
 }
 
 // Methodes
-int Channel::addMember(int fd)
+int Channel::addMember(int fd, const std::string& provided_key)
 {
 	if (user_limit > 0 && members.size() >= user_limit)
 	{
@@ -130,6 +131,10 @@ int Channel::addMember(int fd)
 		return -1;
 	}
 	if (!key.empty() && key != provided_key)
+	{
+		std::cerr << " Error : wrong password" << std::endl;
+		return -1;
+	}
 	members.insert(fd);
 	invited.erase(fd);
 	return 0;
@@ -183,7 +188,7 @@ bool Channel::isOp(int fd) const
 
 bool Channel::isInvited(int fd)
 {
-	return (invited.count(fd) > 0)
+	return (invited.count(fd) > 0);
 }
 
 int Channel::addInvited(int fd)

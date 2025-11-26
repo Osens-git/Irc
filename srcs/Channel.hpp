@@ -6,7 +6,7 @@
 /*   By: cgelgon <cgelgon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/21 10:42:08 by cgelgon           #+#    #+#             */
-/*   Updated: 2025/11/21 13:34:46 by cgelgon          ###   ########.fr       */
+/*   Updated: 2025/11/26 14:25:47 by cgelgon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,9 +15,6 @@
 
 #include <string>
 #include <iostream>
-#include "../srcs/client.hpp"
-#include "../srcs/server.hpp"
-#include "../srcs/irc.hpp"
 #include <vector>
 #include <set>
 
@@ -42,11 +39,11 @@ class Channel
 				bool topic_restricted;
 				size_t user_limit;
 
+				Channel();
 				
 				
 				public :
 				// Cannonique
-				Channel();
 				Channel(const std::string& name);
 				~Channel();
 				Channel(const Channel& other);
@@ -71,7 +68,7 @@ class Channel
 				
 				// Methodes 
 				// Members handling 
-				int addMember(int fd);
+				int addMember(int fd, const std::string& provided_key = "");
 				int rmMember(int fd);
 				bool isMember(int fd) const;
 				// Operators handling

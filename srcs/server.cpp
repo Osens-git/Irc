@@ -3,14 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: earnera <earnera@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/30 15:02:51 by vluo              #+#    #+#             */
-/*   Updated: 2025/11/24 16:27:18 by vluo             ###   ########.fr       */
+/*   Updated: 2025/11/27 11:45:49 by earnera          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "server.hpp"
+#include "client.hpp"
+#include "Channel.hpp"
 
 Server::Server(char **argv) :_pawd(argv[2]), max_fd(3){
 
@@ -77,6 +79,11 @@ Server::~Server(){
 		FD_CLR(clients[i]->get_fd(), &read_fd);
 		delete clients[i];
 	}
+	for (size_t i = 0; i < channels.size(); i++)
+	{
+		delete channels[i];
+	}
+	channels.clear();
 	if (_sock > 0)
 		close(_sock);
 }
@@ -89,7 +96,7 @@ std::string const Server::get_pawd() const { return _pawd; }
 
 int	Server::add_client()
 {
-	Client *c = new Client (_sock);
+	Client *c = new Client (this);
 	if (c->get_fd() < 0 || c == NULL)
 	{
 		if (c == NULL)
@@ -131,9 +138,49 @@ Client *Server::get_client_by_fd(int fd){
 			return (clients[i]);
 	return (NULL);
 }
-Client *Server::get_client_by_nick(std::string nick){
-	for(unsigned long i = 0; i < clients.size(); i ++)
-		if (clients[i]->get_nick() == nick)
-			return (clients[i]);
-	return (NULL);
+
+const std::vector<Channel*>& Server::getChanList() const
+{
+	return channels;
+}
+
+Channel* Server::createChannel(const std::string& name, int maker_fd)
+{
+	Channel *exists = findChannel(name);
+	if (exists != NULL)
+		return exists;
+	Channel *new_chan = new Channel(name);
+	if (new_chan == NULL)
+	{
+		std::cerr << "Cant allocate memory for Channel" << std::endl;
+		return NULL;
+	}
+	channels.push_back(new_chan);
+	new_chan->addMember(maker_fd);
+	new_chan->addOp(maker_fd);
+	std::cout << "ircserv : Channel " << name << "created" << std::endl;
+	return new_chan;
+}
+Channel* Server::findChannel(const std::string& name)
+{
+	for (unsigned long i = 0; i < channels.size(); i++)
+	{
+		if (channels[i]->getName() == name)
+			return channels[i];
+	}
+	return NULL;
+}
+bool Server::deleteChannel(const std::string& name)
+{
+	for (unsigned long i = 0; i < channels.size(); i++)
+	{
+		if (channels[i]->getName() == name)
+		{
+			delete channels[i];
+			channels.erase(channels.begin() + i);
+			std::cout << "ircserv : Channel " << name <<  " deleted" << std::endl;
+			return true;
+		}
+	}
+	return false;
 }

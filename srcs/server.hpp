@@ -3,16 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: earnera <earnera@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/30 14:55:36 by vluo              #+#    #+#             */
-/*   Updated: 2025/11/24 16:27:21 by vluo             ###   ########.fr       */
+/*   Updated: 2025/11/27 11:45:30 by earnera          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
-
-#include "client.hpp"
 
 #include <netinet/in.h>
 #include <string>
@@ -21,6 +19,9 @@
 #include <fcntl.h>
 #include <cstdlib>
 #include <vector>
+
+class Client;
+class Channel;
 
 class Server {
 	
@@ -34,7 +35,8 @@ class Server {
 		sockaddr_in			_hint;
 		int			 		_port;
 		std::string	const 	_pawd;
-
+		// CHANNEL USING
+		std::vector<Channel*> channels;
 	public :
 	
 		Server(char **argv);
@@ -51,8 +53,12 @@ class Server {
 
 		int					add_client();
 		void				delete_client(int fd);
-
-		Client				*get_client_by_fd(int fd);
-		Client				*get_client_by_nick(std::string nick);
-
+		Client				*get_client(int fd);
+		
+		// CHANNEL USING
+		const std::vector<Channel*>& getChanList() const;
+		Channel* createChannel(const std::string& name, int maker_fd);
+		Channel* findChannel(const std::string& name);
+		bool deleteChannel(const std::string& name);
+		
 };

@@ -6,13 +6,13 @@
 /*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/30 15:02:51 by vluo              #+#    #+#             */
-/*   Updated: 2025/11/24 16:27:18 by vluo             ###   ########.fr       */
+/*   Updated: 2025/11/26 18:05:59 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "server.hpp"
 
-Server::Server(char **argv) :_pawd(argv[2]), max_fd(3){
+Server::Server(char **argv) :_pawd(argv[2]){
 
 	struct protoent *pe = getprotobyname("tcp");
 	_sock = socket(AF_INET, SOCK_STREAM, pe->p_proto);
@@ -65,6 +65,7 @@ Server::Server(char **argv) :_pawd(argv[2]), max_fd(3){
 
 	FD_ZERO(&read_fd);
 	FD_SET(_sock, &read_fd);
+	max_fd = _sock;
 
 	std::cout << "ircserv: Listening on port : <" << _port << ">" << std::endl;
 }

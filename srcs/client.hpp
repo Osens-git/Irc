@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cgelgon <cgelgon@student.42.fr>            +#+  +:+       +#+        */
+/*   By: earnera <earnera@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 17:12:39 by vluo              #+#    #+#             */
-/*   Updated: 2025/11/26 16:11:44 by cgelgon          ###   ########.fr       */
+/*   Updated: 2025/11/27 15:15:19 by earnera          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@
 #include <errno.h>
 #include <arpa/inet.h>
 #include <string>
+#include <vector>
 // #include <cstdlib>
 // #include <stdlib.h>
 
@@ -44,7 +45,7 @@ class Client
 		// int				_ch_right;	// ch_right 0 = operator, ch_right 1 = normal user , ...
 		// CHANNEL USING : 
 		Server* _serverptr;
-		std::vector<Channel*> authorized_chans;
+		std::vector<Channel*> authorized_chans; /////////
 		
 		public :
 		
@@ -54,6 +55,7 @@ class Client
 		~Client();
 		
 		std::string	buf;
+		bool			hasPass;
 		
 		void	set_nick(std::string const);
 		void	set_username(std::string const);
@@ -69,7 +71,7 @@ class Client
 		
 		// CHANNEL PART
 		void getClientChan(std::string chanName);
-		const std::vector<Channel*>& getAuthorizedChans() const;
+		const std::vector<Channel*>& getAuthorizedChans() const; /////////////
 		void chan_join(std::string chan_name);
 		void chan_quit(std::string chan_name);
 		bool isInChan(const std::string& chan_name) const;

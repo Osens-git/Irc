@@ -6,7 +6,7 @@
 /*   By: earnera <earnera@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 18:50:29 by vluo              #+#    #+#             */
-/*   Updated: 2025/11/27 11:46:23 by earnera          ###   ########.fr       */
+/*   Updated: 2025/11/27 14:43:44 by earnera          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,21 +63,52 @@ void	check_iscmd(Server &serv, Client *cli)
 	int pos = cli->buf.find(' ');
 	std::string cmd = cli->buf.substr(0, pos);
 	std::transform(cmd.begin(), cmd.end(), cmd.begin(), ::toupper);
-
-	if (cmd == "PASS" || cmd == "PASS\r\n")
+	std::vector<std::string> scmd = split_cmd(cli->buf);
+	if (cmd == "PASS")
 	{
-		std::vector<std::string> str = split_cmd(cli->buf);
+		Commands::handlePASS(serv, cli, scmd);
 	}
-	// if (cmd == "NICK")
-	// if (cmd == "USER")
-	// if (cmd == "PRIVMSG")
-	// if (cmd == "JOIN")
-	// if (cmd == "QUIT")
-	// if (cmd == "PART")
-	// if (cmd == "KICK")
-	// if (cmd == "INVITE")
-	// if (cmd == "TOPIC")
-	// if (cmd == "MODE")
+	if (cmd == "NICK")
+	{
+		Commands::handleNICK(serv, cli, scmd);
+	}
+	if (cmd == "USER")
+	{
+		Commands::handleUSER(serv, cli, scmd);
+	}
+	if (cmd == "PRIVMSG")
+	{
+		Commands::handlePRIVMSG(serv, cli, scmd);
+	}
+	if (cmd == "JOIN")
+	{
+		Commands::handleJOIN(serv, cli, scmd);
+	}
+	if (cmd == "QUIT")
+	{
+		Commands::handleQUIT(serv, cli, scmd);
+	}
+	if (cmd == "PART")
+	{
+		Commands::handlePART(serv, cli, scmd);
+	}
+	if (cmd == "KICK")
+	{
+		Commands::handleKICK(serv, cli, scmd);
+	}
+	if (cmd == "INVITE")
+	{
+		Commands::handleINVITE(serv, cli, scmd);
+	}
+	if (cmd == "TOPIC")
+	{
+		Commands::handleINVITE(serv, cli, scmd);
+	}
+	if (cmd == "MODE")
+
+	{
+		Commands::handleNICK(serv, cli, scmd);
+	}
 
 	(void)serv;
 

@@ -6,7 +6,7 @@
 /*   By: earnera <earnera@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 17:12:06 by vluo              #+#    #+#             */
-/*   Updated: 2025/11/27 11:46:38 by earnera          ###   ########.fr       */
+/*   Updated: 2025/11/27 14:42:05 by earnera          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,6 +64,7 @@ void Client::getClientChan(std::string chanName)
 				authorized_chans.push_back(all_chan[i]);
 			}
 		}
+	(void)chanName;
 }
 const std::vector<Channel*>& Client::getAuthorizedChans()const
 {
@@ -72,7 +73,7 @@ const std::vector<Channel*>& Client::getAuthorizedChans()const
 
 void Client::chan_join(std::string chan_name)
 {
-	for (size_t i; i < authorized_chans.size(); i++)
+	for (size_t i = 0; i < authorized_chans.size(); i++)
 	{
 		if (authorized_chans[i]->getName() == chan_name)
 			return;
@@ -84,7 +85,7 @@ void Client::chan_join(std::string chan_name)
 
 void Client::chan_quit(std::string chan_name)
 {
-	for (size_t i; i < authorized_chans.size(); i++)
+	for (size_t i = 0; i < authorized_chans.size(); i++)
 	{
 		if (authorized_chans[i]->getName() == chan_name)
 		{
@@ -98,7 +99,7 @@ void Client::chan_quit(std::string chan_name)
 
 bool Client::isInChan(const std::string& chan_name) const
 {
-	for (size_t i; i < authorized_chans.size(); i++)
+	for (size_t i = 0; i < authorized_chans.size(); i++)
 	{
 		if (authorized_chans[i]->getName() == chan_name)
 			return true;

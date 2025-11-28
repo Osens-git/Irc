@@ -6,7 +6,7 @@
 /*   By: earnera <earnera@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/27 12:00:42 by earnera           #+#    #+#             */
-/*   Updated: 2025/11/28 11:58:46 by earnera          ###   ########.fr       */
+/*   Updated: 2025/11/28 15:13:41 by earnera          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,7 +70,7 @@ void Commands::handleNICK(Server &serv, Client* cli, const std::vector<std::stri
     
     std::string nickname = cmd[1];
     
-    if(!isvalidnickname)
+    if(!isvalidnickname(nickname))
     {
         std::cerr << " ERR_ERRONEUS" << std::endl;
         return ;
@@ -82,15 +82,22 @@ void Commands::handleNICK(Server &serv, Client* cli, const std::vector<std::stri
     }
     
     cli->set_nick(nickname); 
-    if(!cli->_has_nick)
-        cli->_has_nick = true;
+    cli->_has_nick = true;
+    /*:oldnick!user@host NICK :newnick*/
 }
-        //        ERR_NONICKNAMEGIVEN             ERR_ERRONEUSNICKNAME
-        //    ERR_NICKNAMEINUSE               ERR_NICKCOLLISION
 void Commands::handleUSER(Server &serv, Client* cli, const std::vector<std::string>& cmd){
-        (void)serv;
-    (void)cli;
-    (void)cmd;
+    if(cmd.size() < 4)
+    {
+        std::cerr << "ERR_NEEDMOREPARAMS" << std::endl;
+        return ;
+    }
+    if(cli->_has_user)
+    {
+        std::cerr << "ERR_ALREADYREGISTERED" << std::endl;
+        return ;
+    }
+    cli->set_username(cmd[1]);
+    cli->_has_user = true;
 }
 
 void Commands::handlePRIVMSG(Server &serv, Client* cli, const std::vector<std::string>& cmd){

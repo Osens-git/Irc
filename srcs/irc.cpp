@@ -6,7 +6,7 @@
 /*   By: earnera <earnera@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 18:50:29 by vluo              #+#    #+#             */
-/*   Updated: 2025/11/28 12:18:06 by earnera          ###   ########.fr       */
+/*   Updated: 2025/11/28 14:54:55 by earnera          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,64 +55,73 @@ std::vector<std::string> split_cmd(std::string cmds)
 	return (parse);
 }
 
+
+
 void	check_iscmd(Server &serv, Client *cli)
 {
-	if (cli->buf == "\r\n")
-		return ;
+	while(true)
+	{
+		size_t end = cli->buf.find("\r\n");
+		if(end == std::string::npos)
+			break;
+		
+		std::string line = cli->buf.substr(0, end);
+		cli->buf.erase(0, end + 2);
 
-	int pos = cli->buf.find(' ');
-	std::string cmd = cli->buf.substr(0, pos);
-	std::transform(cmd.begin(), cmd.end(), cmd.begin(), ::toupper);
-	std::vector<std::string> scmd = split_cmd(cli->buf);
-	if (cmd == "PASS")
-	{
-		Commands::handlePASS(serv, cli, scmd);
+		if (line.empty())
+			continue ;
+			
+		std::vector<std::string> scmd = split_cmd(line);
+		if(scmd.empty())
+			continue;
+		
+		std::string cmd = scmd[0];
+		std::transform(cmd.begin(), cmd.end(), cmd.begin(), ::toupper);
+		if (cmd == "PASS")
+		{
+			Commands::handlePASS(serv, cli, scmd);
+		}
+		if (cmd == "NICK")
+		{
+			Commands::handleNICK(serv, cli, scmd);
+		}
+		if (cmd == "USER")
+		{
+			Commands::handleUSER(serv, cli, scmd);
+		}
+		if (cmd == "PRIVMSG")
+		{
+			Commands::handlePRIVMSG(serv, cli, scmd);
+		}
+		if (cmd == "JOIN")
+		{
+			Commands::handleJOIN(serv, cli, scmd);
+		}
+		if (cmd == "QUIT")
+		{
+			Commands::handleQUIT(serv, cli, scmd);
+		}
+		if (cmd == "PART")
+		{
+			Commands::handlePART(serv, cli, scmd);
+		}
+		if (cmd == "KICK")
+		{
+			Commands::handleKICK(serv, cli, scmd);
+		}
+		if (cmd == "INVITE")
+		{
+			Commands::handleINVITE(serv, cli, scmd);
+		}
+		if (cmd == "TOPIC")
+		{
+			Commands::handleTOPIC(serv, cli, scmd);
+		}
+		if (cmd == "MODE")
+		{
+			Commands::handleMODE(serv, cli, scmd);
+		}
 	}
-	if (cmd == "NICK")
-	{
-		Commands::handleNICK(serv, cli, scmd);
-	}
-	if (cmd == "USER")
-	{
-		Commands::handleUSER(serv, cli, scmd);
-	}
-	if (cmd == "PRIVMSG")
-	{
-		Commands::handlePRIVMSG(serv, cli, scmd);
-	}
-	if (cmd == "JOIN")
-	{
-		Commands::handleJOIN(serv, cli, scmd);
-	}
-	if (cmd == "QUIT")
-	{
-		Commands::handleQUIT(serv, cli, scmd);
-	}
-	if (cmd == "PART")
-	{
-		Commands::handlePART(serv, cli, scmd);
-	}
-	if (cmd == "KICK")
-	{
-		Commands::handleKICK(serv, cli, scmd);
-	}
-	if (cmd == "INVITE")
-	{
-		Commands::handleINVITE(serv, cli, scmd);
-	}
-	if (cmd == "TOPIC")
-	{
-		Commands::handleINVITE(serv, cli, scmd);
-	}
-	if (cmd == "MODE")
-
-	{
-		Commands::handleNICK(serv, cli, scmd);
-	}
-
-	(void)serv;
-
-	return ;
 }
 
 void	handle_mes(Server &serv, int fd, int read_val, char *buf, Client *cli)

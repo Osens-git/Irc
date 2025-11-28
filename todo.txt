@@ -1,0 +1,50 @@
+channel to-do
+
+cpp// CHANNEL MANAGEMENT (à ajouter dans la section public)
+void        joinChannel(const std::string& chan_name);
+void        leaveChannel(const std::string& chan_name);
+bool        isInChannel(const std::string& chan_name) const;
+std::string getChannelsList() const;  // Pour debug/affichage
+```
+
+### **Dans client.cpp** - Implémenter ces 4 fonctions :
+
+#### 1️⃣ **joinChannel** 
+```
+FONCTION joinChannel(nom_channel)
+    PARCOURIR authorized_chans
+        SI channel.getName() == nom_channel ALORS
+            RETOURNER (déjà dedans)
+    
+    channel = _serverptr->findChannel(nom_channel)
+    SI channel != NULL ET channel->isMember(_fd) ALORS
+        AJOUTER channel à authorized_chans
+```
+
+#### 2️⃣ **leaveChannel**
+```
+FONCTION leaveChannel(nom_channel)
+    PARCOURIR authorized_chans
+        SI channel.getName() == nom_channel ALORS
+            RETIRER channel de authorized_chans
+            RETOURNER
+```
+
+#### 3️⃣ **isInChannel**
+```
+FONCTION isInChannel(nom_channel) -> bool
+    PARCOURIR authorized_chans
+        SI channel.getName() == nom_channel ALORS
+            RETOURNER vrai
+    RETOURNER faux
+```
+
+#### 4️⃣ **getChannelsList** (bonus pour debug)
+```
+FONCTION getChannelsList() -> string
+    result = ""
+    POUR CHAQUE channel dans authorized_chans
+        result += channel->getName() + " "
+    RETOURNER result
+
+

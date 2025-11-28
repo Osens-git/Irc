@@ -1,22 +1,22 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   server.hpp                                         :+:      :+:    :+:   */
+/*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/30 14:55:36 by vluo              #+#    #+#             */
-/*   Updated: 2025/11/24 16:27:21 by vluo             ###   ########.fr       */
+/*   Updated: 2025/11/28 18:42:19 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
-#include "client.hpp"
+#include "Client.hpp"
+#include "Channel.hpp"
 
 #include <netinet/in.h>
 #include <string>
-#include <iostream>
 #include <unistd.h>
 #include <fcntl.h>
 #include <cstdlib>
@@ -41,6 +41,7 @@ class Server {
 		~Server();
 
 		std::vector<Client *>	clients;
+		std::vector<Channel *>	channels;
 		int						max_fd;
 		fd_set 					read_fd;
 
@@ -51,6 +52,8 @@ class Server {
 
 		int					add_client();
 		void				delete_client(int fd);
+		int					create_channel(std::string name);
+		void				delete_channel(std::string name);
 
 		Client				*get_client_by_fd(int fd);
 		Client				*get_client_by_nick(std::string nick);

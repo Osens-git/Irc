@@ -6,7 +6,7 @@
 /*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 18:50:29 by vluo              #+#    #+#             */
-/*   Updated: 2025/11/26 18:05:10 by vluo             ###   ########.fr       */
+/*   Updated: 2025/11/28 20:31:37 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,52 +24,32 @@ int	check_args(char **argv){
 	return (1);
 }
 
-void	print_parse(std::vector<std::string> parse)
-{
-	std::cout << parse[0] << std::endl;
-	std::cout << "SIZE : " << parse.size() << std::endl;
-	std::cout << "PARSING : ";
-	for (unsigned long i = 0; i < parse.size(); i ++)
-		std::cout << "|" << parse[i] << "| ";
-	std::cout << "END" << std::endl;	
-}
-
-std::vector<std::string> split_cmd(std::string cmds)
-{
-	int deb = 0;
-	unsigned long pos = cmds.find(' ');
-	std::vector<std::string> parse;
-	while (pos != std::string::npos)
-	{
-		parse.push_back(cmds.substr(deb, pos - deb));
-		while (cmds[pos] && cmds[pos] == ' ')
-			pos ++;
-		deb = pos;
-		pos = cmds.find(' ', deb);;
-	}
-	if (cmds.size() - deb - 2 != 0)
-		parse.push_back(cmds.substr(deb, cmds.size() - deb - 2));
-
-	print_parse(parse);
-
-	return (parse);
-}
-
 void	check_iscmd(Server &serv, Client *cli)
 {
 	if (cli->buf == "\r\n")
 		return ;
 
 	int pos = cli->buf.find(' ');
-	std::string cmd = cli->buf.substr(0, pos);
+	std::string cmd;
+	if (pos == std::string::npos)
+		cmd = cli->buf.substr(0, cli->buf.size() - 2);
+	else
+		cmd = cli->buf.substr(0, pos);
 	std::transform(cmd.begin(), cmd.end(), cmd.begin(), ::toupper);
 
-	if (cmd == "PASS" || cmd == "PASS\r\n")
+	if (cmd == "PASS")
 	{
 		std::vector<std::string> str = split_cmd(cli->buf);
 	}
 	// if (cmd == "NICK")
 	// if (cmd == "USER")
+
+	// // if (!cli->registered())
+	// {
+	// 	return_cmd_failure(cli, 451, "", "You have not registered");
+	// 	return ;
+	// }
+
 	// if (cmd == "PRIVMSG")
 	// if (cmd == "JOIN")
 	// if (cmd == "QUIT")
@@ -78,6 +58,7 @@ void	check_iscmd(Server &serv, Client *cli)
 	// if (cmd == "INVITE")
 	// if (cmd == "TOPIC")
 	// if (cmd == "MODE")
+	// if (cmd == "PART")
 
 	(void)serv;
 
@@ -99,16 +80,11 @@ void	handle_mes(Server &serv, int fd, int read_val, char *buf, Client *cli)
 	{
 		cli->buf += line;
 		check_iscmd(serv, cli);
-		std::cout << cli->buf << std::endl;
-		// send(fd, (cli->buf + line).c_str(), cli->buf.size() + line.size(), 0);
 		cli->buf.clear();
 		return ;
 	}
 	if (read_val > 0)
-	{
 		cli->buf.append(line);
-		std::cout << cli->buf << std::endl;
-	}
 }
 
 void	handle_input(Server &serv, int fd)
@@ -125,7 +101,7 @@ void	handle_input(Server &serv, int fd)
 	handle_mes(serv, fd, read_val, buf, serv.get_client_by_fd(fd));
 }
 
-void	handle_client(Server &serv){
+int	handle_client(Server &serv){
 
 	while (!g_signal)
 	{
@@ -137,7 +113,10 @@ void	handle_client(Server &serv){
 			if (FD_ISSET(i, &rfd))
 			{
 				if (i == serv.get_sock())
-					serv.add_client();
+				{
+					if (serv.add_client() == -1)
+						return (1);
+				}
 				else // messsage
 					handle_input(serv, i);
 				sel --;
@@ -145,6 +124,7 @@ void	handle_client(Server &serv){
 			i ++;
 		}
 	}
+	return (0);
 }
 
 void	handle_sig(int sig)
@@ -166,8 +146,6 @@ int main(int argc, char **argv)
 	Server serv(argv);
 	if (serv.get_sock() == -1)
 		return (-1);
-	
-	handle_client(serv);
 
-	return (0);
+	return (handle_client(serv));
 }

@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   client.hpp                                         :+:      :+:    :+:   */
+/*   Client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 17:12:39 by vluo              #+#    #+#             */
-/*   Updated: 2025/11/21 14:21:27 by vluo             ###   ########.fr       */
+/*   Updated: 2025/11/28 19:30:18 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,13 +20,11 @@
 #include <sys/types.h>
 #include <netdb.h>
 #include <cstdio>
-#include <errno.h>
 #include <arpa/inet.h>
-// #include <cstdlib>
-// #include <stdlib.h>
+#include <vector>
+#include <algorithm>
 
-#define BUFFER_SIZE 1
-
+#define BUFFER_SIZE 4096
 
 class Client
 {
@@ -34,11 +32,11 @@ class Client
 
 		Client &operator=(Client const &);
 
-		int				_fd;
-		std::string		_nickname;
-		std::string		_username;
-		// int				_ch_id;		// channel id where the user is in (0 if not in any) , ...
-		// int				_ch_right;	// ch_right 0 = operator, ch_right 1 = normal user , ...
+		int							_fd;
+		std::string					_nickname;
+		std::string					_username;
+		std::string					_host;
+		std::vector<std::string>	_chans;
 
 	public :
 
@@ -47,18 +45,18 @@ class Client
 		Client(int serv_fd);
 		~Client();
 
-		std::string	buf;
+		std::string					buf;
 	
 		void	set_nick(std::string const);
 		void	set_username(std::string const);
-		// void	set_ch_id(int const);
-		// void	set_ch_right(int const);
 
 		std::string	get_nick() 		const;
 		std::string	get_usrname() 	const;
-		// int			get_ch_id() 	const;
-		// int			get_ch_right() 	const;
+		std::string	get_host()		const;
 		int			get_fd() 		const;
-		int			get_id()		const;
+
+		void	delete_channel(std::string const name);
+		void	add_channel(std::string const name);
+		bool	is_inchannel(std::string const name) const;
 		
 };

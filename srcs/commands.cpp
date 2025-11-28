@@ -6,7 +6,7 @@
 /*   By: earnera <earnera@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/27 12:00:42 by earnera           #+#    #+#             */
-/*   Updated: 2025/11/27 15:16:36 by earnera          ###   ########.fr       */
+/*   Updated: 2025/11/28 11:58:46 by earnera          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,13 +22,31 @@ Commands::~Commands() {}
 
 /* *******************************HANDLE*************************************** */
 
+bool        isvalidnickname(std::string nick){
+    if(nick.empty())
+        return false;
+    const std::string specials = "`-[]^{}_|";
+    
+    char first = nick[0];
+    if(!(std::isalpha(static_cast<unsigned char>(first)) || specials.find(first) != std::string::npos))
+        return false;
+    for(size_t i = 1; i < nick.size(); i++)
+    {
+        char c = nick[i];
+        if(!(std::isalnum(static_cast<unsigned char>(c)) || specials.find(c) != std::string::npos))
+            return false;
+    }
+    return true;
+}
+
+
 void Commands::handlePASS(Server &serv, Client* cli, const std::vector<std::string>& cmd){
     if(cmd.size() < 2)
     {
         std::cerr << "ERR_NEEDMOREPARAMS" << std::endl;
         return;
     }
-    if(cli->hasPass)
+    if(cli->_has_pass)
     {
         std::cerr << "ERR_ALREADYREGISTERED" << std::endl;
         return;
@@ -39,15 +57,36 @@ void Commands::handlePASS(Server &serv, Client* cli, const std::vector<std::stri
         std::cerr << "Wrong password, try again" << std::endl;
         return ;
     }
-    cli->hasPass = true;
+    cli->_has_pass = true;
 }
 
 void Commands::handleNICK(Server &serv, Client* cli, const std::vector<std::string>& cmd){
-        (void)serv;
-    (void)cli;
-    (void)cmd;
-}
 
+    if(cmd.size() < 2 || cmd[1].empty())
+    {
+        std::cerr << " ERR_NONICKNAMEGIVEN" << std::endl;
+        return ;
+    }
+    
+    std::string nickname = cmd[1];
+    
+    if(!isvalidnickname)
+    {
+        std::cerr << " ERR_ERRONEUS" << std::endl;
+        return ;
+    }
+    Client *other = serv.get_client_by_nickname(nickname);
+    if(other != NULL && other != cli){
+        std::cerr << "ERR_NICKNAMEINUSE" << std::endl;
+        return ;
+    }
+    
+    cli->set_nick(nickname); 
+    if(!cli->_has_nick)
+        cli->_has_nick = true;
+}
+        //        ERR_NONICKNAMEGIVEN             ERR_ERRONEUSNICKNAME
+        //    ERR_NICKNAMEINUSE               ERR_NICKCOLLISION
 void Commands::handleUSER(Server &serv, Client* cli, const std::vector<std::string>& cmd){
         (void)serv;
     (void)cli;

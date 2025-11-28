@@ -6,7 +6,7 @@
 /*   By: earnera <earnera@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/30 15:02:51 by vluo              #+#    #+#             */
-/*   Updated: 2025/11/27 11:45:49 by earnera          ###   ########.fr       */
+/*   Updated: 2025/11/28 11:57:35 by earnera          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,6 +135,13 @@ void	Server::delete_client(int fd){
 Client *Server::get_client_by_fd(int fd){
 	for(unsigned long i = 0; i < clients.size(); i ++)
 		if (clients[i]->get_fd() == fd)
+			return (clients[i]);
+	return (NULL);
+}
+
+Client *Server::get_client_by_nickname(std::string nick){
+	for(unsigned long i = 0; i < clients.size(); i ++)
+		if (clients[i]->get_nick() == nick)
 			return (clients[i]);
 	return (NULL);
 }

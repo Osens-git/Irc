@@ -6,7 +6,7 @@
 /*   By: earnera <earnera@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/27 12:00:39 by earnera           #+#    #+#             */
-/*   Updated: 2025/11/27 12:07:52 by earnera          ###   ########.fr       */
+/*   Updated: 2025/11/28 11:47:02 by earnera          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 #include <string>
 #include <iostream>
+#include <cctype>
 #include "server.hpp"
 #include "client.hpp"
 
@@ -33,7 +34,6 @@ class Commands {
         static void handleINVITE(Server &serv, Client* cli, const std::vector<std::string>& cmd);
         static void handleTOPIC(Server &serv, Client* cli, const std::vector<std::string>& cmd);
         static void handleMODE(Server &serv, Client* cli, const std::vector<std::string>& cmd);
-
 
         
     private :

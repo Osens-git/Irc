@@ -6,7 +6,7 @@
 /*   By: earnera <earnera@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 17:12:39 by vluo              #+#    #+#             */
-/*   Updated: 2025/11/27 15:15:19 by earnera          ###   ########.fr       */
+/*   Updated: 2025/11/28 10:39:46 by earnera          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,7 +55,10 @@ class Client
 		~Client();
 		
 		std::string	buf;
-		bool			hasPass;
+		bool			_has_pass;
+		bool			_has_nick;
+		bool			_has_user;
+		bool			_registered;
 		
 		void	set_nick(std::string const);
 		void	set_username(std::string const);

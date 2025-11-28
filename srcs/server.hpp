@@ -6,7 +6,7 @@
 /*   By: earnera <earnera@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/30 14:55:36 by vluo              #+#    #+#             */
-/*   Updated: 2025/11/27 11:51:32 by earnera          ###   ########.fr       */
+/*   Updated: 2025/11/28 11:57:28 by earnera          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,7 +55,7 @@ class Server {
 		void				delete_client(int fd);
 		Client				*get_client(int fd);
 		Client *get_client_by_fd(int fd);
-
+		Client *get_client_by_nickname(std::string nick);
 		
 		// CHANNEL USING
 		const std::vector<Channel*>& getChanList() const;

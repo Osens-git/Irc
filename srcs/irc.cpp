@@ -6,7 +6,7 @@
 /*   By: earnera <earnera@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 18:50:29 by vluo              #+#    #+#             */
-/*   Updated: 2025/11/27 14:43:44 by earnera          ###   ########.fr       */
+/*   Updated: 2025/11/28 12:18:06 by earnera          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -161,7 +161,7 @@ void	handle_client(Server &serv){
 	while (!g_signal)
 	{
 		fd_set rfd = serv.read_fd;
-		int i = 3;
+		int i = serv.get_sock();
 		int	sel = select(serv.max_fd + 1, &rfd, NULL, NULL, NULL);
 		while (sel > 0 && i <= serv.max_fd)
 		{			

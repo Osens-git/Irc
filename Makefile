@@ -9,7 +9,8 @@ CFLAGS = -Wall -Werror -Wextra
 
 CSTD = -std=c++98
 
-SRC = srcs/Client.cpp srcs/Channel.cpp srcs/Server.cpp srcs/utils.cpp srcs/irc.cpp
+SRC = 	srcs/Client.cpp srcs/Channel.cpp srcs/Server.cpp \
+		srcs/commands.cpp srcs/utils.cpp srcs/irc.cpp \
 
 OBJ = $(patsubst $(SRC_DIR)%.cpp,$(OBJ_DIR)%.o,$(SRC))
 

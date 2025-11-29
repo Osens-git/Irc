@@ -6,7 +6,7 @@
 /*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 18:50:29 by vluo              #+#    #+#             */
-/*   Updated: 2025/11/28 20:31:37 by vluo             ###   ########.fr       */
+/*   Updated: 2025/11/29 14:18:36 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,21 +26,17 @@ int	check_args(char **argv){
 
 void	check_iscmd(Server &serv, Client *cli)
 {
-	if (cli->buf == "\r\n")
+	if (cli->buf == "")
 		return ;
 
-	int pos = cli->buf.find(' ');
-	std::string cmd;
-	if (pos == std::string::npos)
-		cmd = cli->buf.substr(0, cli->buf.size() - 2);
-	else
+	std::string cmd = cli->buf;
+	unsigned long pos = cli->buf.find(' ');
+	if (pos != std::string::npos)
 		cmd = cli->buf.substr(0, pos);
 	std::transform(cmd.begin(), cmd.end(), cmd.begin(), ::toupper);
 
-	if (cmd == "PASS")
-	{
-		std::vector<std::string> str = split_cmd(cli->buf);
-	}
+	// if (cmd == "PASS")
+	// 	std::vector<std::string> str = split_cmd(cli->buf);
 	// if (cmd == "NICK")
 	// if (cmd == "USER")
 
@@ -50,8 +46,11 @@ void	check_iscmd(Server &serv, Client *cli)
 	// 	return ;
 	// }
 
+	if (cmd == "JOIN")
+	{
+		handle_join(serv, cli);
+	}
 	// if (cmd == "PRIVMSG")
-	// if (cmd == "JOIN")
 	// if (cmd == "QUIT")
 	// if (cmd == "PART")
 	// if (cmd == "KICK")
@@ -78,7 +77,7 @@ void	handle_mes(Server &serv, int fd, int read_val, char *buf, Client *cli)
 
 	if (line.find("\r\n") != std::string::npos)
 	{
-		cli->buf += line;
+		cli->buf += line.substr(0, line.size() - 2);
 		check_iscmd(serv, cli);
 		cli->buf.clear();
 		return ;

@@ -6,7 +6,7 @@
 /*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 17:12:39 by vluo              #+#    #+#             */
-/*   Updated: 2025/11/28 19:30:18 by vluo             ###   ########.fr       */
+/*   Updated: 2025/11/30 18:31:28 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,6 @@ class Client
 		std::string					_nickname;
 		std::string					_username;
 		std::string					_host;
-		std::vector<std::string>	_chans;
 
 	public :
 
@@ -46,6 +45,7 @@ class Client
 		~Client();
 
 		std::string					buf;
+		std::vector<std::string>	chans;
 	
 		void	set_nick(std::string const);
 		void	set_username(std::string const);
@@ -60,3 +60,5 @@ class Client
 		bool	is_inchannel(std::string const name) const;
 		
 };
+
+std::string	to_upper(std::string str);

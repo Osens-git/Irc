@@ -6,13 +6,14 @@
 /*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/30 15:02:51 by vluo              #+#    #+#             */
-/*   Updated: 2025/11/28 16:20:16 by vluo             ###   ########.fr       */
+/*   Updated: 2025/11/30 17:03:05 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
+#include "irc.hpp"
 
-Server::Server(char **argv) :_pawd(argv[2]){
+Server::Server(char **argv) :_pawd(argv[2]), stop(0) {
 
 	struct protoent *pe = getprotobyname("tcp");
 	_sock = socket(AF_INET, SOCK_STREAM, pe->p_proto);
@@ -78,6 +79,10 @@ Server::~Server(){
 		FD_CLR(clients[i]->get_fd(), &read_fd);
 		delete clients[i];
 	}
+	clients.clear();
+	for (unsigned long i = 0; i < channels.size(); i ++)
+		delete channels[i];
+	channels.clear();
 	if (_sock > 0)
 		close(_sock);
 }
@@ -96,7 +101,7 @@ int	Server::add_client()
 		if (c == NULL)
 			std::cerr << "Error: Failed to allocate \
 				new memory for client" << std::endl;
-		return (-1);
+		return (0);
 	}
 		
 	std::cout << "ircserv: Client " << c->get_fd() << " connected to server" <<std::endl;
@@ -113,17 +118,12 @@ int	Server::add_client()
 
 void	Server::delete_client(int fd){
 
-	for(unsigned long i = 0 ; i < clients.size(); i ++)
-	{
-		if (clients[i]->get_fd() == fd)
-		{
-			close(fd);
-			FD_CLR(fd, &read_fd);
-			delete clients[i];
-			clients.erase(clients.begin() + i);
-			break;
-		}
-	}
+	Client *cli = get_client_by_fd(fd);
+	std::cout << "ircserv: Client " << fd << " disconnected" << std::endl; 
+	close(fd);
+	FD_CLR(fd, &read_fd);
+	clients.erase(std::find(clients.begin(), clients.end(), cli));
+	delete cli;
 }
 
 Client *Server::get_client_by_fd(int fd){
@@ -136,5 +136,43 @@ Client *Server::get_client_by_nick(std::string nick){
 	for(unsigned long i = 0; i < clients.size(); i ++)
 		if (clients[i]->get_nick() == nick)
 			return (clients[i]);
+	return (NULL);
+}
+
+int	Server::create_channel(std::string name)
+{
+	Channel *chan = new Channel(name);
+	if (chan == 0)
+	{
+		std::cerr << "Error: Failed to allocate new memory for client" << std::endl;
+		stop = 1;
+		return (0);
+	}
+	
+	channels.push_back(chan);
+	return (1);
+}
+
+void	Server::delete_channel(std::string name)
+{
+	for (std::vector<Channel *>::iterator it = channels.begin(); it < channels.end(); it ++)
+	{
+		if ((*it)->getName() == name)
+		{
+			delete *it;
+			channels.erase(it);
+			return ;
+		}
+	}
+}
+
+Channel	*Server::get_Channel_by_name(std::string name)
+{
+	std::string up_name = to_upper(name);
+	for (std::vector<Channel *>::iterator it = channels.begin(); it < channels.end(); it ++)
+	{
+		if (to_upper((*it)->getName()) == up_name)
+			return (*it);
+	}
 	return (NULL);
 }

@@ -6,7 +6,7 @@
 /*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/30 14:55:36 by vluo              #+#    #+#             */
-/*   Updated: 2025/11/28 18:42:19 by vluo             ###   ########.fr       */
+/*   Updated: 2025/11/30 11:18:32 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,7 @@ class Server {
 		std::vector<Channel *>	channels;
 		int						max_fd;
 		fd_set 					read_fd;
+		int						stop;
 
 		int					get_sock() const;
 		sockaddr_in 		get_hint() const;
@@ -52,10 +53,12 @@ class Server {
 
 		int					add_client();
 		void				delete_client(int fd);
-		int					create_channel(std::string name);
-		void				delete_channel(std::string name);
-
 		Client				*get_client_by_fd(int fd);
 		Client				*get_client_by_nick(std::string nick);
+		
+		int					create_channel(std::string name);
+		void				delete_channel(std::string name);
+		Channel				*get_Channel_by_name(std::string name);
+
 
 };

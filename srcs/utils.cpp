@@ -6,7 +6,7 @@
 /*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/28 16:10:29 by vluo              #+#    #+#             */
-/*   Updated: 2025/11/29 14:15:17 by vluo             ###   ########.fr       */
+/*   Updated: 2025/11/30 17:31:53 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,8 @@ Exemple :
 std::string	return_cmd_success(Client *cli, std::string cmd, std::string arg)
 {
 	std::string nick = cli->get_nick();
-	char buf[5 + nick.size() + cmd.size() + arg.size()];
+	nick = "vluo_tmp"; // tmp
+	char buf[6 + nick.size() + cmd.size() + arg.size()];
 	sprintf(buf, ":%s %s :%s\n", nick.c_str(), cmd.c_str(), arg.c_str());
 	return (buf);
 }
@@ -44,17 +45,22 @@ Exemple:
 ->	:ircserv 461 PASS :Not enought parameters
 
 (arg can be empty depending on the command)
+//	also if <arg> is    	: "exemple"
+//		pass <arg> + " "	: "exemple " 
+//		  if <arg> is		: ""
+//		pass <arg> as is	: ""
+//	to respect syntax 		
 
 */
 std::string	return_cmd_failure(int code, std::string arg, std::string msg)
 {
 	char buf[25 + arg.size() + msg.size()];
-	sprintf(buf, ":ircserv %d %s :%s\n", code, arg.c_str(), msg.c_str());
+	sprintf(buf, ":ircserv %d %s:%s\n", code, arg.c_str(), msg.c_str());
 	return (buf);
 }
 
 /*
-For sending messages to inform client -> :ircserv <code> <nick> :<msg>
+For sending messages to inform client -> :ircserv <code> <cmd> :<msg>
 
 Exemple:
 >	PASS pwd
@@ -65,11 +71,10 @@ Exemple:
 ->	...
 
 */
-std::string	return_msg_info(Client *cli, int code, std::string msg)
+std::string	return_msg_info(int code, std::string cmd, std::string msg)
 {
-	std::string nick = cli->get_nick();
-	char buf[25 + nick.size() + msg.size()];
-	std::sprintf(buf, ":ircserv %d %s:%s\n", code, nick.c_str(), msg.c_str());
+	char buf[25 + cmd.size() + msg.size()];
+	std::sprintf(buf, ":ircserv %d %s :%s\n", code, cmd.c_str(), msg.c_str());
 	return (buf);
 }
 
@@ -102,13 +107,57 @@ std::vector<std::string> split(std::string cmds, char delimiter)
 	return (parse);
 }
 
+void	send_fail(Client *cli, int code, std::string arg, std::string msg)
+{
+	std::string rtr = return_cmd_failure(code, arg, msg);
+	send(cli->get_fd(), rtr.c_str(), rtr.size(), 0);
+}
+
+std::string	to_upper(std::string str)
+{
+	std::string res(str);
+	for (std::size_t i = 0; i < str.size(); i ++)
+		res[i] = std::toupper(str[i]);
+	return (res);
+}
+
 int	enough_params(std::vector<std::string> args, Client *cli, unsigned long nb_params)
 {
-	if (args.size() - 1 <= nb_params)
+	if (args.size() - 1 < nb_params)
 	{
-		std::string msg = return_cmd_failure(461, args[0], "Not enough parameters");
+		std::string msg = return_cmd_failure(461, args[0] + " ", "Not enough parameters");
 		send(cli->get_fd(), msg.c_str(), msg.size(), 0);
 		return (0);
 	}
 	return (1);
+}
+int	channop(Channel *chan, Client *cli)
+{
+	if (!chan->isop(cli))
+	{
+		std::string msg = return_cmd_failure(481, "", "Permission Denied- You're not an IRC operator");
+		send(cli->get_fd(), msg.c_str(), msg.size(), 0);
+		return (0);
+	}
+	return (1);
+}
+
+int	good_ch_mask(std::string name, Client *cli)
+{
+	if (name.size() > 50 || (name[0] != '&' && name[0] != '#' && name[0] != '+' && name[0] != '!'))
+	{
+		std::string msg = return_cmd_failure(476, name + " ", "Bad Channel Mask");
+		send(cli->get_fd(), msg.c_str(), msg.size(), 0);
+		return (0);
+	}
+	for (unsigned long int i = 0; i < name.size(); i ++)
+	{
+		if (name[i] == 7)
+		{
+			std::string msg = return_cmd_failure(476, name + " ", "Bad Channel Mask");
+			send(cli->get_fd(), msg.c_str(), msg.size(), 0);
+			return (0);
+		}
+	}
+	return (1);		
 }

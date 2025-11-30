@@ -6,7 +6,7 @@
 /*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 18:50:29 by vluo              #+#    #+#             */
-/*   Updated: 2025/11/29 14:18:36 by vluo             ###   ########.fr       */
+/*   Updated: 2025/11/30 17:40:57 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ int	check_args(char **argv){
 	std::strtold(argv[1], &p);
 
 	if (*p != 0)
-		return (std::cerr << "Error: " << argv[1] << " not valid port" << std::endl, -1);
+		return (std::cerr << "Error: " << argv[1] << " not valid port" << std::endl, 0);
 	return (1);
 }
 
@@ -33,7 +33,7 @@ void	check_iscmd(Server &serv, Client *cli)
 	unsigned long pos = cli->buf.find(' ');
 	if (pos != std::string::npos)
 		cmd = cli->buf.substr(0, pos);
-	std::transform(cmd.begin(), cmd.end(), cmd.begin(), ::toupper);
+	cmd = to_upper(cmd);
 
 	// if (cmd == "PASS")
 	// 	std::vector<std::string> str = split_cmd(cli->buf);
@@ -46,21 +46,25 @@ void	check_iscmd(Server &serv, Client *cli)
 	// 	return ;
 	// }
 
+	if (cmd == "QUIT")
+		handle_quit(serv, cli);
 	if (cmd == "JOIN")
-	{
 		handle_join(serv, cli);
-	}
-	// if (cmd == "PRIVMSG")
-	// if (cmd == "QUIT")
-	// if (cmd == "PART")
-	// if (cmd == "KICK")
-	// if (cmd == "INVITE")
-	// if (cmd == "TOPIC")
-	// if (cmd == "MODE")
-	// if (cmd == "PART")
+	if (cmd == "PART")
+		handle_part(serv, cli);
+	if (cmd == "PRIVMSG")
+		handle_privmsg(serv, cli);
+	if (cmd == "KICK")
+		handle_kick(serv, cli);
+	if (cmd == "INVITE")
+		handle_inivte(serv, cli);
+	if (cmd == "TOPIC")
+		handle_topic(serv, cli);
+	if (cmd == "MODE")
+		handle_mode(serv, cli);
 
-	(void)serv;
-
+	if (cmd != "QUIT")
+		cli->buf.clear();
 	return ;
 }
 
@@ -79,7 +83,6 @@ void	handle_mes(Server &serv, int fd, int read_val, char *buf, Client *cli)
 	{
 		cli->buf += line.substr(0, line.size() - 2);
 		check_iscmd(serv, cli);
-		cli->buf.clear();
 		return ;
 	}
 	if (read_val > 0)
@@ -92,17 +95,13 @@ void	handle_input(Server &serv, int fd)
 
 	int	read_val = recv(fd, buf, BUFFER_SIZE, 0);
 	if (read_val <= 0)
-	{
-		std::cout << "ircserv: Client " << fd << " disconnected" << std::endl;
-		serv.delete_client(fd);
-		return ;
-	}
+		return (serv.delete_client(fd));
 	handle_mes(serv, fd, read_val, buf, serv.get_client_by_fd(fd));
 }
 
 int	handle_client(Server &serv){
 
-	while (!g_signal)
+	while (!g_signal && !serv.stop)
 	{
 		fd_set rfd = serv.read_fd;
 		int i = serv.get_sock();

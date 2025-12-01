@@ -6,7 +6,7 @@
 /*   By: cgelgon <cgelgon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 17:12:06 by vluo              #+#    #+#             */
-/*   Updated: 2025/11/26 16:29:06 by cgelgon          ###   ########.fr       */
+/*   Updated: 2025/12/01 13:37:58 by cgelgon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,7 +72,7 @@ const std::vector<Channel*>& Client::getAuthorizedChans()const
 
 void Client::chan_join(std::string chan_name)
 {
-	for (size_t i; i < authorized_chans.size(); i++)
+	for (size_t i = 0; i < authorized_chans.size(); i++)
 	{
 		if (authorized_chans[i]->getName() == chan_name)
 			return;
@@ -84,11 +84,11 @@ void Client::chan_join(std::string chan_name)
 
 void Client::chan_quit(std::string chan_name)
 {
-	for (size_t i; i < authorized_chans.size(); i++)
+	for (size_t i = 0; i < authorized_chans.size(); i++)
 	{
 		if (authorized_chans[i]->getName() == chan_name)
 		{
-			authorized_chans.erase(authorized_chans.begin() +1);
+			authorized_chans.erase(authorized_chans.begin() +i);
 			return;
 		}
 	}
@@ -98,7 +98,7 @@ void Client::chan_quit(std::string chan_name)
 
 bool Client::isInChan(const std::string& chan_name) const
 {
-	for (size_t i; i < authorized_chans.size(); i++)
+	for (size_t i = 0; i < authorized_chans.size(); i++)
 	{
 		if (authorized_chans[i]->getName() == chan_name)
 			return true;

@@ -6,7 +6,7 @@
 /*   By: cgelgon <cgelgon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 17:12:06 by vluo              #+#    #+#             */
-/*   Updated: 2025/12/01 13:37:58 by cgelgon          ###   ########.fr       */
+/*   Updated: 2025/12/01 16:13:24 by cgelgon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,19 +52,20 @@ std::string Client::get_usrname() const { return (_username); }
 int			Client::get_fd() const { return (_fd); }
 
 //CHANNEL USING : 
-void Client::getClientChan(std::string chanName)
-{
-	const std::vector<Channel*>&all_chan = _serverptr->getChanList();
-	authorized_chans.clear();
+// void Client::getClientChan(std::string chanName)
+// {
+	
+// 	const std::vector<Channel*>&all_chan = _serverptr->getChanList();
+// 	authorized_chans.clear();
 
-		for (size_t i = 0; i < all_chan.size(); i++)
-		{
-			if(all_chan[i]->isMember(this->_fd))
-			{
-				authorized_chans.push_back(all_chan[i]);
-			}
-		}
-}
+// 		for (size_t i = 0; i < all_chan.size(); i++)
+// 		{
+// 			if(all_chan[i]->isMember(this->_fd))
+// 			{
+// 				authorized_chans.push_back(all_chan[i]);
+// 			}
+// 		}
+// }
 const std::vector<Channel*>& Client::getAuthorizedChans()const
 {
 	return this->authorized_chans;
@@ -72,6 +73,7 @@ const std::vector<Channel*>& Client::getAuthorizedChans()const
 
 void Client::chan_join(std::string chan_name)
 {
+	(void)chan_name;
 	for (size_t i = 0; i < authorized_chans.size(); i++)
 	{
 		if (authorized_chans[i]->getName() == chan_name)

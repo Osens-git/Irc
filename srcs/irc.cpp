@@ -6,7 +6,7 @@
 /*   By: cgelgon <cgelgon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 18:50:29 by vluo              #+#    #+#             */
-/*   Updated: 2025/12/01 14:40:24 by cgelgon          ###   ########.fr       */
+/*   Updated: 2025/12/01 17:18:23 by cgelgon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,8 +104,180 @@ void cmd_PART(Server &server, Client *client, std::vector<std::string> &params)
 	chan->broadcast(part_message + "\r\n", +1);
 	chan->rmMember(client->get_fd());
 	client->chan_quit(chan_name);
-	if (chan->getMemberCount() == 0);
-	server.deleteChannel(chan_name);
+	if (chan->getMemberCount() == 0)
+		server.deleteChannel(chan_name);
+}
+
+void cmd_PRIVMSG(Server &server, Client *client, std::vector<std::string> &params)
+{
+	if (params.size() < 2)
+	{
+		send_reply(client->get_fd(), "ERROR need more parameters");
+		return;
+	}
+	std::string target = params[0];
+	std::string message = params[1];
+
+	if (target[0] == '#')
+	{
+		Channel *chan = server.findChannel(target);
+		if (chan == NULL)
+		{
+			send_reply(client->get_fd(), "ERROR : cham doesnt exist");
+			return;
+		}
+		if (!chan->isMember(client->get_fd()))
+		{
+			send_reply(client->get_fd(), "ERROR : Cant send the message");
+			return;
+		}
+		std::string msg = ":" + client->get_nick() + " PRIVMSG" + target + " :" + message + "\r\n";
+		chan->broadcast(msg, client->get_fd());
+	}
+}
+
+void cmd_KICK(Server &server, Client *client, std::vector<std::string> &params)
+{
+	if (params.size() < 2)
+	{
+		send_reply(client->get_fd(), "ERROR need more parameters");
+		return;
+	}
+	std::string chan_name = params[0];
+	std::string target_nick = params[1];
+	std::string reason = (params.size() > 2) ? params[2] : "Kicked";
+
+	Channel *chan = server.findChannel(chan_name);
+	if (chan == NULL)
+	{
+		send_reply(client->get_fd(), "ERROR : You're not channel operator");
+		return;
+	}
+	Client *target = NULL;
+	for (size_t i = 0; i < server.clients.size(); i++)
+	{
+		if (server.clients[i]->get_nick() == target_nick)
+		{
+			target = server.clients[i];
+			break;
+		}
+	}
+	if (target == NULL)
+	{
+		send_reply(client->get_fd(), "ERROR : No such nick");
+		return;
+	}
+	if (!chan->isMember(target->get_fd()))
+	{
+		send_reply(client->get_fd(), "ERROR : user not in channel");
+		return;
+	}
+	std::string kick_msg = "+" + client->get_nick() + " KICK " + chan_name + " " + target_nick + " :" + reason + "\r\n";
+	chan->broadcast(kick_msg, -1);
+	chan->rmMember(target->get_fd());
+	target->chan_quit(chan_name);
+}
+
+void cmd_INVITE(Server &server, Client *client, std::vector<std::string> &params)
+{
+	if (params.size() < 2)
+	{
+		send_reply(client->get_fd(), "ERROR need more parameters");
+		return;
+	}
+	std::string target_nick = params[0];
+	std::string chan_name = params[1];
+	Channel *chan = server.findChannel(chan_name);
+	if (chan == NULL)
+	{
+		send_reply(client->get_fd(), "ERROR : Channel doesnt exist");
+		return;
+	}
+	if (!chan->isMember(client->get_fd()))
+	{
+		send_reply(client->get_fd(), "ERROR : you're not on that channel");
+		return;		
+	}
+
+	Client *target = NULL;
+	for (size_t i = 0; i < server.clients.size(); i++)
+	{
+		if (server.clients[i]->get_nick() == target_nick)
+		{
+			target = server.clients[i];
+			break;
+		}
+	}
+	if (target == NULL)
+	{
+		send_reply(client->get_fd(), "ERROR : no such nick");
+		return;
+	}
+	if (chan->isMember(target->get_fd()))
+	{
+		send_reply(client->get_fd(), "ERROR : User already in channel");
+		return;
+	}
+	chan->addInvited(target->get_fd());
+	send_reply(client->get_fd(), "341" + client->get_nick() + " " + target_nick + " " + chan_name);
+	std::string invite_msg = ":" + client->get_nick() + " INVITE " + target_nick + " " + chan_name;
+	send_reply(target->get_fd(), invite_msg);
+}
+
+std::vector<std::string> split_params(const std::string& str)
+{
+		std::vector<std::string> result;
+		size_t start = 0;
+		size_t end = 0;
+	
+		while(end != std::string::npos)
+		{
+			end = str.find(' ', start);
+			if (start < str.length() && str[start] == ':')
+			{
+				result.push_back(str.substr(start + 1));
+				break;
+			}
+			std::string token = str.substr(start, (end = std::string::npos) ? std::string::npos : end - start);
+			if (!token.empty())
+				result.push_back(token);
+			start = (end > std::string::npos) ? std::string::npos: end + 1;
+		}
+	return result;
+}
+
+void exec_cmd(Server &server, Client *client, const std::string& message)
+{
+	//takeoff \r\n
+	std::string clean_msg = message;
+	size_t pos = clean_msg.find("\r\n");
+	if (pos != std::string::npos)
+		clean_msg = clean_msg.substr(0, pos);
+		
+	// lf cmd
+	size_t space_pos = clean_msg.find(' ');
+	std::string cmd;
+	std::string params_str;
+	
+	if (space_pos == std::string::npos)
+			cmd = clean_msg;
+	else
+	{
+		cmd = clean_msg.substr(0, space_pos);
+		params_str = clean_msg.substr(space_pos + 1);
+	}
+
+	// parse param with split params
+	std::vector<std::string> params = split_params(params_str);
+
+	if (cmd == "JOIN")
+		cmd_JOIN(server, client, params);
+	else if (cmd == "PART")
+		cmd_PART(server, client, params);
+	else if (cmd == "PRIVMSG")
+		cmd_PRIVMSG(server, client, params);
+	else
+		send_reply(client->get_fd(), "ERROR : Unknown cmd");
 }
 
 void	handle_mes(Server &serv, int fd, int read_val, char *buf)

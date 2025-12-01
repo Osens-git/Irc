@@ -6,7 +6,7 @@
 /*   By: cgelgon <cgelgon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/21 10:42:08 by cgelgon           #+#    #+#             */
-/*   Updated: 2025/11/26 14:25:47 by cgelgon          ###   ########.fr       */
+/*   Updated: 2025/12/01 16:08:53 by cgelgon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,7 @@ class Channel
 				bool isTopicRestricted() const;
 				size_t getUserLimit() const;
 				size_t getMemberCount() const;
-				const std::set<int>& Channel::getMembers() const;
+				const std::set<int>& getMembers() const;
 
 				// Setters				
 				bool            setTopic(const std::string& topic, int fd);

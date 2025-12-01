@@ -6,7 +6,7 @@
 /*   By: cgelgon <cgelgon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 17:12:39 by vluo              #+#    #+#             */
-/*   Updated: 2025/11/26 16:11:44 by cgelgon          ###   ########.fr       */
+/*   Updated: 2025/12/01 16:13:08 by cgelgon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@
 #include <errno.h>
 #include <arpa/inet.h>
 #include <string>
+#include <vector>
 // #include <cstdlib>
 // #include <stdlib.h>
 
@@ -68,7 +69,7 @@ class Client
 		int			get_id()		const;
 		
 		// CHANNEL PART
-		void getClientChan(std::string chanName);
+		//void getClientChan(std::string chanName);
 		const std::vector<Channel*>& getAuthorizedChans() const;
 		void chan_join(std::string chan_name);
 		void chan_quit(std::string chan_name);

@@ -6,7 +6,7 @@
 /*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/30 15:02:51 by vluo              #+#    #+#             */
-/*   Updated: 2025/11/30 17:03:05 by vluo             ###   ########.fr       */
+/*   Updated: 2025/12/03 16:01:05 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,8 +110,8 @@ int	Server::add_client()
 	if (c->get_fd() > max_fd)
 		max_fd = c->get_fd();
 
-	// std::string msg(":ircserv: 001 vluo :Welcome");
-	// send(c->get_fd(), msg.c_str(), msg.size(), 0);
+	std::string msg(":ircserv 001 4 :Welcome\n");
+	send(c->get_fd(), msg.c_str(), msg.size(), 0);
 		
 	return (1);
 }

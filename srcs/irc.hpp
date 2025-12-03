@@ -6,7 +6,7 @@
 /*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 18:50:55 by vluo              #+#    #+#             */
-/*   Updated: 2025/11/30 17:41:13 by vluo             ###   ########.fr       */
+/*   Updated: 2025/12/03 15:57:41 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,10 +25,11 @@
 #include <fcntl.h>
 #include <csignal>
 #include <cctype>
+#include <algorithm>
 
 /* UTILS */
 std::string					return_cmd_success(Client *cli, std::string cmd, std::string arg);
-std::string					return_cmd_failure(int code, std::string arg, std::string msg);
+std::string					return_cmd_failure(Client *cli, int code, std::string arg, std::string msg);
 std::string					return_msg_info(int code, std::string cmd, std::string msg);
 void						print_parse(std::vector<std::string> parse); // to delete later
 std::vector<std::string>	split(std::string cmds, char delimiter);

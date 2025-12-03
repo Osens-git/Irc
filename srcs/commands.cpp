@@ -6,7 +6,7 @@
 /*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/29 13:16:43 by vluo              #+#    #+#             */
-/*   Updated: 2025/11/30 18:25:59 by vluo             ###   ########.fr       */
+/*   Updated: 2025/12/03 17:01:46 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ void	handle_quit(Server &serv, Client *cli)
 	unsigned long pos = cli->buf.find(" ");
 	std::string quit_msg("");
 	if (pos != std::string::npos)
-		quit_msg = " " + cli->buf.substr(pos);
+		quit_msg = cli->buf.substr(pos);
 	for (std::vector<std::string>::iterator it = cli->chans.begin(); it < cli->chans.end(); it ++)
 	{
 		std::string msg = return_cmd_success(cli, "QUIT", *it + quit_msg);
@@ -69,14 +69,24 @@ void	handle_join(Server &serv, Client *cli)
 
 void	handle_part(Server &serv, Client *cli)
 {
-	std::vector<std::string> args = split(cli->buf, ' ');
+
+	std::cout << cli->buf << std::endl;
+
+	std::vector<std::string> args;
+	std::string leaving_msg("");
+	std::size_t pos = cli->buf.find(':');
+	if (pos != std::string::npos)
+	{
+		args = split(cli->buf.substr(0, pos - 1), ' ');
+		leaving_msg = cli->buf.substr(pos + 1);
+	}
+	else
+		args = split(cli->buf, ' ');
+
 	if (!enough_params(args, cli, 1))
 		return ;
 
 	std::vector<std::string> join_chan = split(args[1], ',');
-	std::string leaving_msg("");
-	for (unsigned long i = 2 ; i < args.size(); i ++)
-		leaving_msg.append(" " + args[i]);
 
 	for (std::vector<std::string>::iterator it = join_chan.begin(); it < join_chan.end(); it ++)
 	{
@@ -92,11 +102,11 @@ void	handle_part(Server &serv, Client *cli)
 			send_fail(cli, 442, name + " ", "You're not on that channel");
 			continue ;
 		}
-		cli->delete_channel(name);
-		ch->rmMember(cli);
-		std::string msg = return_cmd_success(cli, "PART", name + leaving_msg);
+		std::string msg = return_cmd_success(cli, "PART " + name, leaving_msg);
 		send(cli->get_fd(), msg.c_str(), msg.size(), 0);
 		ch->broadcast(msg, cli->get_fd());
+		cli->delete_channel(name);
+		ch->rmMember(cli);
 	}
 }
 
@@ -106,25 +116,29 @@ void	handle_privmsg(Server &serv, Client *cli)
 	if (args.size() - 1 < 1)
 		return (send_fail(cli,411, "", "No recipient given (PRIVMSG)"));
 
-	std::string send_msg("");
-	for (unsigned long i = 2 ; i < args.size() - 1; i ++)
-		send_msg.append(args[i] + " ");
-	send_msg.append(args[args.size() - 1]);
+	std::size_t pos1 = cli->buf.find(' ');
+	std::size_t pos2 = cli->buf.substr(pos1 + 1).find(' ');
+	std::string reci_name = cli->buf.substr(pos1 + 1, pos2);
 
-	Client *reci = serv.get_client_by_nick(args[1]);
-	Channel *ch = serv.get_Channel_by_name(args[1]);
+	std::string send_msg("");
+	if (pos2 != std::string::npos)
+		send_msg = cli->buf.substr(pos1 + 1 + pos2 + 1);
+	if (send_msg[0] == ':')
+		send_msg.erase(0, 1);
+
+	Client *reci = serv.get_client_by_nick(reci_name);
+	Channel *ch = serv.get_Channel_by_name(reci_name);
 	
 	if (reci == NULL && ch == NULL)
 		return (send_fail(cli, 401, args[1] + " ", "No such nick/channel"));
-	if (args.size() == 2)
-		return (send_fail(cli, 412, "", "No text to send"));
+	if (send_msg == "")
+		return (send_fail(cli, 412, " ", "No text to send"));
 
 	std::string msg = return_cmd_success(cli, "PRIVMSG " + args[1], send_msg);
 	if (reci != NULL)
 		send(reci->get_fd(), msg.c_str(), msg.size(), 0);
 	if (ch != NULL)
 		ch->broadcast(msg, cli->get_fd());
-
 }
 
 static void kick_from_1chan(Server &serv, Client *cli, std::string ch_name, std::vector<std::string> kick_users, std::string kick_msg)
@@ -146,8 +160,9 @@ static void kick_from_1chan(Server &serv, Client *cli, std::string ch_name, std:
 			send_fail(cli, 441, *it + " " + ch_name + " ", "They aren't on that channel");
 			continue ;
 		}
-		std::string msg = return_cmd_success(cli, "KICK", *it + kick_msg);
-		ch->broadcast(msg, cli->get_fd());
+		std::string msg = return_cmd_success(cli, "KICK " + ch_name, *it + kick_msg);
+		std::cout << "msg: |" << msg << std::endl;
+		ch->broadcast(msg, -1);
 		ch->rmMember(usr);
 		usr->delete_channel(ch_name);
 	}
@@ -182,7 +197,7 @@ void	kick_chs_usrs(Server &serv, Client *cli, std::vector<std::string> kick_chan
 			send_fail(cli, 441, kick_users[u] + " " + ch->getName() + " ", "They aren't on that channel");
 			continue;
 		}
-		std::string msg = return_cmd_success(cli, "KICK", *it + kick_msg);
+		std::string msg = return_cmd_success(cli, "KICK " + ch->getName(), usr->get_nick() + " " + kick_msg);
 		ch->broadcast(msg, cli->get_fd());
 		ch->rmMember(usr);
 		usr->delete_channel(*it);
@@ -191,6 +206,9 @@ void	kick_chs_usrs(Server &serv, Client *cli, std::vector<std::string> kick_chan
 
 void	handle_kick(Server &serv, Client *cli)
 {
+
+	std::cout << "buf : |" << cli->buf << std::endl;
+
 	std::vector<std::string> args = split(cli->buf, ' ');
 	if (!enough_params(args, cli, 2))
 		return ;
@@ -237,7 +255,7 @@ void	handle_inivte(Server &serv, Client *cli)
 	std::string usr_msg = return_cmd_success(cli, "INVITE " + args[1], args[2]);
 	send(usr->get_fd(), usr_msg.c_str(), usr_msg.size(), 0);
 
-	std::string cli_msg = return_msg_info(341, cli->get_nick(),args[2] + " " + args[1]);
+	std::string cli_msg = return_msg_info(341, cli->get_nick() + " " + args[1], args[2]);
 	send(cli->get_fd(), cli_msg.c_str(), cli_msg.size(), 0);
 
 	ch->addInvited(usr);
@@ -253,11 +271,15 @@ void	handle_topic(Server &serv, Client *cli)
 	if (!ch)
 		return (send_fail(cli, 442, args[1] + " ", "You're not on that channel"));
 
+	if (args.size() == 3 && args[2] == ":")
+		args.pop_back();
+
 	if (args.size() == 2)
 	{
 		if (ch->getTopic() == "")
 		{
-			std::string msg = return_msg_info(331, cli->get_nick() + " " + args[1], "No topic is set");
+			std::string msg = return_msg_info(331, cli->get_nick(), args[1] + " :" "No topic is set");
+			std::cout << msg << std::endl;
 			send(cli->get_fd(), msg.c_str(), msg.size(), 0);
 			return ;
 		}
@@ -268,96 +290,129 @@ void	handle_topic(Server &serv, Client *cli)
 
 	if (!channop(ch, cli))
 		return ;
-	
+
 	std::string topic("");
 	for (unsigned long i = 2; i < args.size() - 1; i ++)
 		topic.append(args[i] + " ");
 	topic.append(args[args.size() - 1]);
+	if (topic[0] == ':')
+		topic.erase(0, 1);
 	
 	ch->setTopic(topic);
-	std::string msg = return_cmd_success(cli, "TOPIC", topic);
-	send(cli->get_fd(), msg.c_str(), msg.size(), 0);
+	std::string msg = return_cmd_success(cli, "TOPIC " + ch->getName(), topic);
+	ch->broadcast(msg, -1);
 }
 
 void	handle_mode(Server &serv, Client *cli)
 {
+
+	std::cout << cli->buf << std::endl;
+
 	std::vector<std::string> args = split(cli->buf, ' ');
-	if (!enough_params(args, cli, 3))
+	if (!enough_params(args, cli, 2))
 		return ;
 
 	Channel *ch = serv.get_Channel_by_name(args[1]);
 	std::string mode = args[2];
-	std::string params = args[3];
+	std::string params("");
+	if (args.size() > 3) 
+		params = args[3];
 
 	if (!ch)
 		return (send_fail(cli, 403, args[1], "No such channel"));
 	if (!channop(ch, cli))
 		return ;
-	if (mode.size() != 2 || (mode[1] != 'i' && mode[1] != 't' && mode[1] != 'k' && mode[1] != 'o' && mode[1] != 'l'
-			&& mode[0] != '+' && mode[0] != '-'))
+	if (mode.size() < 2)
 		return (send_fail(cli, 472, std::string(&mode[1]) + " ", "is unknown mode char to me for " + args[1]));
-	
-	if (mode[1] == 'i')
-	{
-		ch->setInviteOnly(mode[0] == '+');
-		std::string msg = return_msg_info(324, cli->get_nick(), args[1] + " " + mode);
-		ch->broadcast(msg, cli->get_fd());
-	}
 
-	if (mode[1] == 't')
-	{
-		ch->setTopicRestricted(mode[0] == '+');
-		std::string msg = return_msg_info(324, cli->get_nick(), args[1] + " " + mode);
-		ch->broadcast(msg, cli->get_fd());
-	}
+	std::cout << "mode : |" << mode << std::endl;
+	std::cout << "params : |" << params << std::endl;
 
-	if (mode[1] == 'k')
+	int stop = mode.size();
+	if (params != "")
+		stop = std::min(mode.size() - 1, (unsigned long)3);
+	for (unsigned long i = 1; i < mode.size(); i ++)
 	{
-		if (mode[0] == '+')
+		if (mode[i] != 'i' && mode[i] != 't' && mode[i] != 'k' && mode[i] != 'o' && mode[i] != 'l')
 		{
-			if (ch->getKey() == "")
-				return (send_fail(cli, 467, args[1] + " ", "Channel key already set"));
-			std::string msg = return_msg_info(324, cli->get_nick(), args[1] + " " + mode + " " + params);
-			ch->broadcast(msg, cli->get_fd());
-			ch->setKey(params);
+			send_fail(cli, 472, mode[i] + std::string(" "), "is unknown mode char to me for " + args[1]);
+			continue;
 		}
-		else
+		if (mode[i] == 'i')
 		{
-			std::string msg = return_msg_info(324, cli->get_nick(), args[1] + " " + mode + " " + ch->getKey());
-			ch->broadcast(msg, cli->get_fd());
-			ch->setKey("");
+			ch->setInviteOnly(mode[0] == '+');
+			continue ;
+		}
+
+		if (mode[i] == 't')
+		{
+			ch->setTopicRestricted(mode[0] == '+');
+			continue ;
+		}
+
+		if (mode[i] == 'k')
+		{
+			if (mode[0] == '+')
+			{
+				if (ch->getKey() != "")
+				{
+					send_fail(cli, 467, args[1] + " ", "Channel key already set");
+					continue ;
+				}
+				ch->setKey(params);
+				continue ;
+			}
+			else
+			{
+				ch->setKey("");
+				continue ;
+			}
+		}
+
+		if (mode[i] == 'o')
+		{
+			if (params == "")
+				continue ;
+			Client *usr = serv.get_client_by_nick(params);
+			if (!usr)
+			{
+				send_fail(cli, 441, params + " " + args[1] + " ",  "They aren't on that channel");
+				continue ;
+			}
+			if (mode[0] == '+')
+				ch->addOp(usr);
+			else
+				ch->rmOp(usr);
+			continue;
+		}
+
+		if (mode[i] == 'l')
+		{
+			if (mode[0] == '+')
+			{
+				if (params == "")
+				{
+					send_fail(cli, 461, "MODE +l ", "Not enought parameters");
+					continue ;
+				}
+				int limit = std::atoi(params.c_str());
+				if (limit == 0)
+					continue;
+				ch->setUserLimit(limit);
+				continue ;
+			}
+			else
+			{
+				ch->setUserLimit(-1);
+				continue ;
+			}
 		}
 	}
+	if (params != "")
+		params.insert(0, " ");
 
-	if (mode[1] == 'o')
-	{
-		Client *usr = serv.get_client_by_nick(params);
-		if (!usr)
-			return (send_fail(cli, 441, params + " " + args[1] + " ",  "They aren't on that channel"));
-
-		if (mode[0] == '+')
-			ch->addOp(usr);
-		else
-			ch->rmOp(usr);
-		std::string msg = return_msg_info(324, cli->get_nick(), args[1] + " " + mode + " " + params);
-		ch->broadcast(msg, cli->get_fd());
-	}
-
-	if (mode[1] == 'l')
-	{
-		if (mode[0] == '+')
-		{
-			int limit = std::atoi(params.c_str());
-			if (limit == 0)
-				return ;
-			ch->setUserLimit(limit);
-			std::string msg = return_msg_info(324, cli->get_nick(), args[1] + " " + mode + " " + params);
-			ch->broadcast(msg, cli->get_fd());
-		}
-		else
-		{
-			std::string msg = return_msg_info(324, cli->get_nick(), args[1] + " " + mode);
-			ch->broadcast(msg, cli->get_fd());
-		}
-	}
+	std::string msg_cli = return_cmd_success(cli, "MODE " + args[1], mode.substr(0, stop + 1) + params);
+	std::cout << msg_cli << std::endl;
+	send(cli->get_fd(), msg_cli.c_str(), msg_cli.size(), 0);
+	ch->broadcast(msg_cli, cli->get_fd());
 }

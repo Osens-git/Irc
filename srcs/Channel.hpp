@@ -6,7 +6,7 @@
 /*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/21 10:42:08 by cgelgon           #+#    #+#             */
-/*   Updated: 2025/11/30 17:32:04 by vluo             ###   ########.fr       */
+/*   Updated: 2025/12/03 16:29:29 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,8 +47,6 @@ class Channel
 		std::string			getKey()			const;
 		bool				isInviteOnly()		const;
 		bool				isTopicRestricted() const;
-		size_t				getUserLimit()		const;
-		size_t				getMemberCount()	const;
 
 		// Setters				
 		void	setTopic(std::string topic);
@@ -78,5 +76,5 @@ class Channel
 };
 
 std::string	return_cmd_success(Client *cli, std::string cmd, std::string arg);
-std::string	return_cmd_failure(int code, std::string arg, std::string msg);
+std::string	return_cmd_failure(Client *cli, int code, std::string arg, std::string msg);
 std::string	return_msg_info(int code, std::string cmd, std::string msg);

@@ -9,7 +9,8 @@ CFLAGS = -Wall -Werror -Wextra
 
 CSTD = -std=c++98
 
-SRC = srcs/client.cpp srcs/server.cpp srcs/irc.cpp srcs/Channel.cpp
+SRC = 	srcs/Client.cpp srcs/Channel.cpp srcs/Server.cpp \
+		srcs/commands.cpp srcs/utils.cpp srcs/irc.cpp \
 
 OBJ = $(patsubst $(SRC_DIR)%.cpp,$(OBJ_DIR)%.o,$(SRC))
 
@@ -30,28 +31,6 @@ clean :
 fclean : clean
 	rm -rf $(NAME)
 
-re : fclean all
+re : fclean all 
 
-# Git operations
-push:
-	@git add .
-	@echo -n "$(BLUE)Enter your commit message for IRC: $(END)"
-	@read commit_message; \
-	git commit -m "IRC: $$commit_message"; \
-	git push; \
-	echo "$(YELLOW)📤 All CPP Module  has been pushed with 'CPP09: $$commit_message'$(END)"
-
-save:
-	@git add .
-	@git status --porcelain | grep -q . && { \
-		echo -n "$(BLUE)Enter your commit message for IRC: $(END)"; \
-		read commit_message; \
-		git commit -m "IRC: $$commit_message"; \
-		echo "$(GREEN)💾 Changes saved locally with 'IRC: $$commit_message'$(END)"; \
-	} || echo "$(YELLOW)ℹ️  No changes to commit$(END)"
-
-push-force: save
-	@git push
-	@echo "$(GREEN)📤 Pushed to remote repository$(END)"%  
-
-.PHONY : all clean fclean re push save push-force
+.PHONY : all clean fclean re

@@ -1,27 +1,26 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   server.hpp                                         :+:      :+:    :+:   */
+/*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cgelgon <cgelgon@student.42.fr>            +#+  +:+       +#+        */
+/*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/30 14:55:36 by vluo              #+#    #+#             */
-/*   Updated: 2025/11/26 14:48:22 by cgelgon          ###   ########.fr       */
+/*   Updated: 2025/12/03 17:26:34 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
+#include "Client.hpp"
+#include "Channel.hpp"
+
 #include <netinet/in.h>
 #include <string>
-#include <iostream>
 #include <unistd.h>
 #include <fcntl.h>
 #include <cstdlib>
 #include <vector>
-
-class Client;
-class Channel;
 
 class Server {
 	
@@ -35,16 +34,17 @@ class Server {
 		sockaddr_in			_hint;
 		int			 		_port;
 		std::string	const 	_pawd;
-		// CHANNEL USING
-		std::vector<Channel*> channels;
+
 	public :
 	
 		Server(char **argv);
 		~Server();
 
 		std::vector<Client *>	clients;
+		std::vector<Channel *>	channels;
 		int						max_fd;
 		fd_set 					read_fd;
+		int						stop;
 
 		int					get_sock() const;
 		sockaddr_in 		get_hint() const;
@@ -53,12 +53,15 @@ class Server {
 
 		int					add_client();
 		void				delete_client(int fd);
-		Client				*get_client(int fd);
+		void				register_client(Client *cli);
+		Client				*get_client_by_fd(int fd);
+		Client				*get_client_by_nick(std::string nick);
 		
-		// CHANNEL USING
-		const std::vector<Channel*>& getChanList() const;
-		Channel* createChannel(const std::string& name, int maker_fd);
-		Channel* findChannel(const std::string& name);
-		bool deleteChannel(const std::string& name);
-		
+		int					create_channel(std::string name);
+		void				delete_channel(std::string name);
+		Channel				*get_Channel_by_name(std::string name);
+
+		void broadcast(std::string msg, int exclude_fd);
+		void welcome_msg(Client *cli);
+
 };

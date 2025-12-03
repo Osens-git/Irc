@@ -6,7 +6,7 @@
 /*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/30 14:55:36 by vluo              #+#    #+#             */
-/*   Updated: 2025/11/30 11:18:32 by vluo             ###   ########.fr       */
+/*   Updated: 2025/12/03 17:26:34 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,7 @@ class Server {
 
 		int					add_client();
 		void				delete_client(int fd);
+		void				register_client(Client *cli);
 		Client				*get_client_by_fd(int fd);
 		Client				*get_client_by_nick(std::string nick);
 		
@@ -60,5 +61,7 @@ class Server {
 		void				delete_channel(std::string name);
 		Channel				*get_Channel_by_name(std::string name);
 
+		void broadcast(std::string msg, int exclude_fd);
+		void welcome_msg(Client *cli);
 
 };

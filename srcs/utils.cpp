@@ -6,7 +6,7 @@
 /*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/28 16:10:29 by vluo              #+#    #+#             */
-/*   Updated: 2025/12/02 17:58:07 by vluo             ###   ########.fr       */
+/*   Updated: 2025/12/03 17:59:30 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,10 @@ Exemple:
 std::string	return_cmd_failure(Client *cli, int code, std::string arg, std::string msg)
 {
 	char buf[25 + cli->get_nick().size() + arg.size() + msg.size()];
-	sprintf(buf, ":ircserv %d %s %s:%s\n", code, cli->get_nick().c_str(), arg.c_str(), msg.c_str());
+	if (cli->get_nick() == "")
+		sprintf(buf, ":ircserv %03d %s:%s\n", code, arg.c_str(), msg.c_str());
+	else
+		sprintf(buf, ":ircserv %03d %s %s:%s\n", code, cli->get_nick().c_str(), arg.c_str(), msg.c_str());
 	return (buf);
 }
 
@@ -73,7 +76,7 @@ Exemple:
 std::string	return_msg_info(int code, std::string cmd, std::string msg)
 {
 	char buf[25 + cmd.size() + msg.size()];
-	std::sprintf(buf, ":ircserv %d %s :%s\n", code, cmd.c_str(), msg.c_str());
+	std::sprintf(buf, ":ircserv %03d %s :%s\n", code, cmd.c_str(), msg.c_str());
 	return (buf);
 }
 

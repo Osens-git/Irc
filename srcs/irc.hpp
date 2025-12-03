@@ -6,7 +6,7 @@
 /*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 18:50:55 by vluo              #+#    #+#             */
-/*   Updated: 2025/12/03 15:57:41 by vluo             ###   ########.fr       */
+/*   Updated: 2025/12/03 17:52:29 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,11 +40,14 @@ int							channop(Channel *chan, Client *cli);
 int							good_ch_mask(std::string name, Client *cli);
 
 /* COMMANDS */
-void	handle_quit(Server &serv, Client *cli);
-void	handle_join(Server &serv, Client *cli);
-void	handle_part(Server &serv, Client *cli);
-void	handle_privmsg(Server &serv, Client *cli);
-void	handle_kick(Server &serv, Client *cli);
-void	handle_inivte(Server &serv, Client *cli);
-void	handle_topic(Server &serv, Client *cli);
-void	handle_mode(Server &serv, Client *cli);
+void    handle_pass(Server &serv, Client* cli, const std::vector<std::string>& cmd);
+void    handle_nick(Server &serv, Client* cli, const std::vector<std::string>& cmd);
+void    handle_user(Server &serv, Client* cli, const std::vector<std::string>& cmd);
+void	handle_quit(Server &serv, Client *cli, std::string line);
+void	handle_join(Server &serv, Client *cli, std::string line);
+void	handle_part(Server &serv, Client *cli, std::string line);
+void	handle_privmsg(Server &serv, Client *cli, std::string line);
+void	handle_kick(Server &serv, Client *cli, std::string line);
+void	handle_inivte(Server &serv, Client *cli, std::string line);
+void	handle_topic(Server &serv, Client *cli, std::string line);
+void	handle_mode(Server &serv, Client *cli, std::string line);

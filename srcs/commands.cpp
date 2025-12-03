@@ -6,19 +6,136 @@
 /*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/29 13:16:43 by vluo              #+#    #+#             */
-/*   Updated: 2025/12/03 17:01:46 by vluo             ###   ########.fr       */
+/*   Updated: 2025/12/03 18:04:28 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Channel.hpp"
 #include "irc.hpp"
 
-void	handle_quit(Server &serv, Client *cli)
+std::string extract_full(const std::vector<std::string>& cmd)
 {
-	unsigned long pos = cli->buf.find(" ");
+	if(cmd.size() < 5)
+		return "";
+	std::string realname;
+	for(size_t i = 4; i < cmd.size(); i++)
+	{
+		if(!realname.empty())
+			realname += " ";
+		realname += cmd[i];
+	}
+	if(!realname.empty() && realname[0] == ':')
+		realname.erase(0, 1);
+	return(realname);
+}
+
+bool        isvalidnickname(std::string nick){
+    if(nick.empty())
+        return false;
+    const std::string specials = "`-[]^{}_|";
+    
+    char first = nick[0];
+    if(!(std::isalpha(static_cast<unsigned char>(first)) || specials.find(first) != std::string::npos))
+        return false;
+    for(size_t i = 1; i < nick.size(); i++)
+    {
+        char c = nick[i];
+        if(!(std::isalnum(static_cast<unsigned char>(c)) || specials.find(c) != std::string::npos))
+            return false;
+    }
+    return true;
+}
+
+
+void handle_pass(Server &serv, Client* cli, const std::vector<std::string>& cmd)
+{
+    if (cmd.size() < 2)
+    {
+        send_fail(cli, 461, "PASS ", "Not enough parameters");
+        return;
+    }
+
+    if (cli->_has_pass)
+    {
+        send_fail(cli, 462, "", "You may not reregister");
+        return;
+    }
+
+    if (cmd[1] != serv.get_pawd())
+    {
+        send_fail(cli, 464, "", "Password incorrect");
+        return;
+    }
+
+    cli->_has_pass = true;
+	if(cli->_has_pass && cli->_has_nick && cli->_has_user)
+		serv.register_client(cli);
+}
+
+
+void handle_nick(Server &serv, Client* cli, const std::vector<std::string>& cmd)
+{
+    if (cmd.size() < 2 || cmd[1].empty())
+    {
+        send_fail(cli, 431, "", "No nickname given");
+        return;
+    }
+
+    std::string nickname = cmd[1];
+
+    if (!isvalidnickname(nickname))
+    {
+        send_fail(cli, 432, nickname + " ", "Erroneous nickname");
+        return;
+    }
+
+    Client* other = serv.get_client_by_nick(nickname);
+    if (other && other != cli)
+    {
+        send_fail(cli, 433, nickname + " " + nickname + " ", "Nickname is already in use");
+        return;
+    }
+
+    std::string oldnick = cli->get_nick();
+    cli->set_nick(nickname);
+    cli->_has_nick = true;
+	if(cli->_has_pass && cli->_has_nick && cli->_has_user)
+			serv.register_client(cli);
+	if (cli->_has_nick)
+	{
+		std::string msg = ":" + oldnick + "!" + cli->get_usrname() + "@" + cli->get_host() + " NICK :" + nickname + "\r\n";
+		send(cli->get_fd(), msg.c_str(), msg.size(), 0);
+	}
+		
+}
+
+void handle_user(Server &serv, Client* cli, const std::vector<std::string>& cmd)
+{
+	if (cmd.size() < 5)
+    {
+        send_fail(cli, 461, "USER ", "Not enough parameters");
+        return;
+    }
+
+    if (cli->_has_user)
+    {
+        send_fail(cli, 462, "", "You may not reregister");
+        return;
+    }
+	cli->set_username(cmd[1]);
+	cli->set_mode(std::atoi(cmd[2].c_str()));
+	cli->set_realname(extract_full(cmd));
+    cli->_has_user = true;
+	if(cli->_has_pass && cli->_has_nick && cli->_has_user)
+		serv.register_client(cli);
+}
+
+void	handle_quit(Server &serv, Client *cli, std::string line)
+{
+	unsigned long pos = line.find(" ");
 	std::string quit_msg("");
 	if (pos != std::string::npos)
-		quit_msg = cli->buf.substr(pos);
+		quit_msg = line.substr(pos);
 	for (std::vector<std::string>::iterator it = cli->chans.begin(); it < cli->chans.end(); it ++)
 	{
 		std::string msg = return_cmd_success(cli, "QUIT", *it + quit_msg);
@@ -33,9 +150,9 @@ void	handle_quit(Server &serv, Client *cli)
 	return ;
 }
 
-void	handle_join(Server &serv, Client *cli)
+void	handle_join(Server &serv, Client *cli, std::string line)
 {
-	std::vector<std::string> args = split(cli->buf, ' ');
+	std::vector<std::string> args = split(line, ' ');
 	if (!enough_params(args, cli, 1))
 		return ;
 
@@ -67,21 +184,21 @@ void	handle_join(Server &serv, Client *cli)
 	return ;
 }
 
-void	handle_part(Server &serv, Client *cli)
+void	handle_part(Server &serv, Client *cli, std::string line)
 {
 
-	std::cout << cli->buf << std::endl;
+	std::cout << line << std::endl;
 
 	std::vector<std::string> args;
 	std::string leaving_msg("");
-	std::size_t pos = cli->buf.find(':');
+	std::size_t pos = line.find(':');
 	if (pos != std::string::npos)
 	{
-		args = split(cli->buf.substr(0, pos - 1), ' ');
-		leaving_msg = cli->buf.substr(pos + 1);
+		args = split(line.substr(0, pos - 1), ' ');
+		leaving_msg = line.substr(pos + 1);
 	}
 	else
-		args = split(cli->buf, ' ');
+		args = split(line, ' ');
 
 	if (!enough_params(args, cli, 1))
 		return ;
@@ -110,19 +227,19 @@ void	handle_part(Server &serv, Client *cli)
 	}
 }
 
-void	handle_privmsg(Server &serv, Client *cli)
+void	handle_privmsg(Server &serv, Client *cli, std::string line)
 {
-	std::vector<std::string> args = split(cli->buf, ' ');
+	std::vector<std::string> args = split(line, ' ');
 	if (args.size() - 1 < 1)
 		return (send_fail(cli,411, "", "No recipient given (PRIVMSG)"));
 
-	std::size_t pos1 = cli->buf.find(' ');
-	std::size_t pos2 = cli->buf.substr(pos1 + 1).find(' ');
-	std::string reci_name = cli->buf.substr(pos1 + 1, pos2);
+	std::size_t pos1 = line.find(' ');
+	std::size_t pos2 = line.substr(pos1 + 1).find(' ');
+	std::string reci_name = line.substr(pos1 + 1, pos2);
 
 	std::string send_msg("");
 	if (pos2 != std::string::npos)
-		send_msg = cli->buf.substr(pos1 + 1 + pos2 + 1);
+		send_msg = line.substr(pos1 + 1 + pos2 + 1);
 	if (send_msg[0] == ':')
 		send_msg.erase(0, 1);
 
@@ -204,12 +321,12 @@ void	kick_chs_usrs(Server &serv, Client *cli, std::vector<std::string> kick_chan
 	}
 }
 
-void	handle_kick(Server &serv, Client *cli)
+void	handle_kick(Server &serv, Client *cli, std::string line)
 {
 
-	std::cout << "buf : |" << cli->buf << std::endl;
+	std::cout << "buf : |" << line << std::endl;
 
-	std::vector<std::string> args = split(cli->buf, ' ');
+	std::vector<std::string> args = split(line, ' ');
 	if (!enough_params(args, cli, 2))
 		return ;
 
@@ -230,9 +347,9 @@ void	handle_kick(Server &serv, Client *cli)
 	kick_chs_usrs(serv, cli, kick_chans, kick_users, kick_msg);
 }
 
-void	handle_inivte(Server &serv, Client *cli)
+void	handle_inivte(Server &serv, Client *cli, std::string line)
 {
-	std::vector<std::string> args = split(cli->buf, ' ');
+	std::vector<std::string> args = split(line, ' ');
 	if (!enough_params(args, cli, 2))
 		return ;
 
@@ -261,9 +378,9 @@ void	handle_inivte(Server &serv, Client *cli)
 	ch->addInvited(usr);
 }
 
-void	handle_topic(Server &serv, Client *cli)
+void	handle_topic(Server &serv, Client *cli, std::string line)
 {
-	std::vector<std::string> args = split(cli->buf, ' ');
+	std::vector<std::string> args = split(line, ' ');
 	if (!enough_params(args, cli, 1))
 		return ;
 
@@ -303,12 +420,9 @@ void	handle_topic(Server &serv, Client *cli)
 	ch->broadcast(msg, -1);
 }
 
-void	handle_mode(Server &serv, Client *cli)
+void	handle_mode(Server &serv, Client *cli, std::string line)
 {
-
-	std::cout << cli->buf << std::endl;
-
-	std::vector<std::string> args = split(cli->buf, ' ');
+	std::vector<std::string> args = split(line, ' ');
 	if (!enough_params(args, cli, 2))
 		return ;
 
@@ -319,7 +433,7 @@ void	handle_mode(Server &serv, Client *cli)
 		params = args[3];
 
 	if (!ch)
-		return (send_fail(cli, 403, args[1], "No such channel"));
+		return (send_fail(cli, 403, args[1] + " ", "No such channel"));
 	if (!channop(ch, cli))
 		return ;
 	if (mode.size() < 2)

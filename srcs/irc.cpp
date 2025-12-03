@@ -6,7 +6,7 @@
 /*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 18:50:29 by vluo              #+#    #+#             */
-/*   Updated: 2025/11/30 17:40:57 by vluo             ###   ########.fr       */
+/*   Updated: 2025/12/03 18:16:08 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,79 +24,75 @@ int	check_args(char **argv){
 	return (1);
 }
 
-void	check_iscmd(Server &serv, Client *cli)
+int	check_iscmd(Server &serv, Client *cli, std::string line)
 {
-	if (cli->buf == "")
-		return ;
 
-	std::string cmd = cli->buf;
-	unsigned long pos = cli->buf.find(' ');
-	if (pos != std::string::npos)
-		cmd = cli->buf.substr(0, pos);
-	cmd = to_upper(cmd);
+	std::vector<std::string> cmd_vec = split(line, ' ');
 
-	// if (cmd == "PASS")
-	// 	std::vector<std::string> str = split_cmd(cli->buf);
-	// if (cmd == "NICK")
-	// if (cmd == "USER")
+	if (cmd_vec.empty())
+        return (0);
 
-	// // if (!cli->registered())
-	// {
-	// 	return_cmd_failure(cli, 451, "", "You have not registered");
-	// 	return ;
-	// }
+    std::string cmd = to_upper(cmd_vec[0]);
+
+    if (cmd == "PASS")
+        handle_pass(serv, cli, cmd_vec);
+    else if (cmd == "NICK")
+        handle_nick(serv, cli, cmd_vec);
+    else if (cmd == "USER")
+        handle_user(serv, cli, cmd_vec);
+
+    if (!cli->_registered && cmd != "PASS" && cmd != "NICK" && cmd != "USER")
+    {
+        send_fail(cli, 451, "", "You have not registered");
+        return (0);
+    }
 
 	if (cmd == "QUIT")
-		handle_quit(serv, cli);
+		return (handle_quit(serv, cli, line), 1);
 	if (cmd == "JOIN")
-		handle_join(serv, cli);
+		handle_join(serv, cli, line);
 	if (cmd == "PART")
-		handle_part(serv, cli);
+		handle_part(serv, cli, line);
 	if (cmd == "PRIVMSG")
-		handle_privmsg(serv, cli);
+		handle_privmsg(serv, cli, line);
 	if (cmd == "KICK")
-		handle_kick(serv, cli);
+		handle_kick(serv, cli, line);
 	if (cmd == "INVITE")
-		handle_inivte(serv, cli);
+		handle_inivte(serv, cli, line);
 	if (cmd == "TOPIC")
-		handle_topic(serv, cli);
+		handle_topic(serv, cli, line);
 	if (cmd == "MODE")
-		handle_mode(serv, cli);
+		handle_mode(serv, cli, line);
 
-	if (cmd != "QUIT")
-		cli->buf.clear();
-	return ;
+	return (0);
 }
 
-void	handle_mes(Server &serv, int fd, int read_val, char *buf, Client *cli)
+void handle_mes(Server &serv, int read_val, char *buf, Client *cli)
 {
-	std::string line(buf, buf + read_val);
+    cli->buf.append(buf, read_val);
 
-	int	rl = recv(fd, buf, BUFFER_SIZE, 0);
-	while (rl > 0)
-	{
-		line += std::string(buf, buf + rl);
-		rl = recv(fd, buf, BUFFER_SIZE, 0);
-	}
+	int	stop = 0;
+    size_t pos;
+    while (!stop && (pos = cli->buf.find("\r\n")) != std::string::npos)
+    {
+        std::string line = cli->buf.substr(0, pos);
+        cli->buf.erase(0, pos + 2);
 
-	if (line.find("\r\n") != std::string::npos)
-	{
-		cli->buf += line.substr(0, line.size() - 2);
-		check_iscmd(serv, cli);
-		return ;
-	}
-	if (read_val > 0)
-		cli->buf.append(line);
+        // std::vector<std::string> cmd_vec = split(line, ' ');
+        stop = check_iscmd(serv, cli, line);
+    }
 }
+
 
 void	handle_input(Server &serv, int fd)
 {
 	char buf[BUFFER_SIZE];
 
 	int	read_val = recv(fd, buf, BUFFER_SIZE, 0);
+
 	if (read_val <= 0)
 		return (serv.delete_client(fd));
-	handle_mes(serv, fd, read_val, buf, serv.get_client_by_fd(fd));
+	handle_mes(serv, read_val, buf, serv.get_client_by_fd(fd));
 }
 
 int	handle_client(Server &serv){

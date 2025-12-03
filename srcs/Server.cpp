@@ -6,7 +6,7 @@
 /*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/30 15:02:51 by vluo              #+#    #+#             */
-/*   Updated: 2025/12/03 16:01:05 by vluo             ###   ########.fr       */
+/*   Updated: 2025/12/03 17:42:41 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,11 +109,15 @@ int	Server::add_client()
 	FD_SET(c->get_fd(), &read_fd);
 	if (c->get_fd() > max_fd)
 		max_fd = c->get_fd();
-
-	std::string msg(":ircserv 001 4 :Welcome\n");
-	send(c->get_fd(), msg.c_str(), msg.size(), 0);
 		
 	return (1);
+}
+
+void	Server::register_client(Client *cli){
+	if(cli->_registered)
+		return ;
+	cli->_registered = true;
+	welcome_msg(cli);
 }
 
 void	Server::delete_client(int fd){
@@ -175,4 +179,35 @@ Channel	*Server::get_Channel_by_name(std::string name)
 			return (*it);
 	}
 	return (NULL);
+}
+
+void Server::broadcast(std::string msg, int exclude_fd)
+{
+	const char *c_msg = msg.c_str();
+	int	len = msg.size();
+
+	 for (size_t i = 0; i < clients.size(); i++)
+    {
+        int fd = clients[i]->get_fd();
+        if (fd != exclude_fd)
+            send(fd, c_msg, len, 0);
+    }
+}
+
+
+void Server::welcome_msg(Client *cli)
+{
+    std::string nick = cli->get_nick();
+
+    send(cli->get_fd(), return_msg_info(001, nick, "Welcome to the ft_irc network").c_str(), 
+		return_msg_info(1, nick, "Welcome to the ft_irc network").size(), 0);
+
+    send(cli->get_fd(), return_msg_info(002, nick, "Your host is ircserv, running version 1.0").c_str(),
+        return_msg_info(2, nick, "Your host is ircserv, running version 1.0").size(), 0);
+
+    send(cli->get_fd(), return_msg_info(003, nick, "This server was created today").c_str(),
+        return_msg_info(3, nick, "This server was created today").size(), 0);
+
+    send(cli->get_fd(), return_msg_info(004, nick, "ircserv 1.0 o o").c_str(),
+        return_msg_info(4, nick, "ircserv 1.0 o o").size(), 0);
 }

@@ -6,7 +6,7 @@
 /*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 17:12:39 by vluo              #+#    #+#             */
-/*   Updated: 2025/11/30 18:31:28 by vluo             ###   ########.fr       */
+/*   Updated: 2025/12/03 17:31:32 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,9 @@ class Client
 		int							_fd;
 		std::string					_nickname;
 		std::string					_username;
+		std::string					_realname;
 		std::string					_host;
+		int							_mode;
 
 	public :
 
@@ -46,14 +48,22 @@ class Client
 
 		std::string					buf;
 		std::vector<std::string>	chans;
+		bool						_has_pass;
+		bool						_has_nick;
+		bool						_has_user;
+		bool						_registered;
 	
 		void	set_nick(std::string const);
 		void	set_username(std::string const);
+		void	set_realname(std::string const realname);
+		void	set_mode(int mode);
 
 		std::string	get_nick() 		const;
 		std::string	get_usrname() 	const;
 		std::string	get_host()		const;
+		std::string get_realname()	const;
 		int			get_fd() 		const;
+		int			get_mode()		const;
 
 		void	delete_channel(std::string const name);
 		void	add_channel(std::string const name);

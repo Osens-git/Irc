@@ -6,7 +6,7 @@
 /*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 18:50:29 by vluo              #+#    #+#             */
-/*   Updated: 2025/12/03 18:16:08 by vluo             ###   ########.fr       */
+/*   Updated: 2025/12/03 18:23:16 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,7 +58,7 @@ int	check_iscmd(Server &serv, Client *cli, std::string line)
 	if (cmd == "KICK")
 		handle_kick(serv, cli, line);
 	if (cmd == "INVITE")
-		handle_inivte(serv, cli, line);
+		handle_invite(serv, cli, line);
 	if (cmd == "TOPIC")
 		handle_topic(serv, cli, line);
 	if (cmd == "MODE")

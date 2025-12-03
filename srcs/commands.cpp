@@ -6,7 +6,7 @@
 /*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/29 13:16:43 by vluo              #+#    #+#             */
-/*   Updated: 2025/12/03 18:04:28 by vluo             ###   ########.fr       */
+/*   Updated: 2025/12/03 18:23:03 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -347,7 +347,7 @@ void	handle_kick(Server &serv, Client *cli, std::string line)
 	kick_chs_usrs(serv, cli, kick_chans, kick_users, kick_msg);
 }
 
-void	handle_inivte(Server &serv, Client *cli, std::string line)
+void	handle_invite(Server &serv, Client *cli, std::string line)
 {
 	std::vector<std::string> args = split(line, ' ');
 	if (!enough_params(args, cli, 2))

@@ -6,7 +6,7 @@
 /*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/21 11:16:16 by cgelgon           #+#    #+#             */
-/*   Updated: 2025/12/03 16:29:26 by vluo             ###   ########.fr       */
+/*   Updated: 2025/12/03 18:30:01 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,7 @@ int Channel::addMember(Client *cli, std::string key)
 		return (0);
 	}
 
-	if (!_key.empty() && _key != key)
+	if (std::find(_invited.begin(), _invited.end(), cli->get_fd()) == _invited.end() && !_key.empty() && _key != key)
 	{
 		std::string msg = return_cmd_failure(cli, 475, _name + " ", "Cannot join channel (+k wrong key)"); 
 		send(cli->get_fd(), msg.c_str(), msg.size(), 0);
@@ -118,7 +118,7 @@ bool	Channel::isop(Client *cli) const{
 
 void Channel::addInvited(Client *cli)
 {
-	if (std::find(_invited.begin(), _invited.end(), cli->get_fd()) != _invited.end())
+	if (std::find(_invited.begin(), _invited.end(), cli->get_fd()) == _invited.end())
 		_invited.push_back(cli->get_fd());
 }
 

@@ -6,7 +6,7 @@
 /*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 18:50:55 by vluo              #+#    #+#             */
-/*   Updated: 2025/12/03 17:52:29 by vluo             ###   ########.fr       */
+/*   Updated: 2025/12/03 18:23:11 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,6 @@ void	handle_join(Server &serv, Client *cli, std::string line);
 void	handle_part(Server &serv, Client *cli, std::string line);
 void	handle_privmsg(Server &serv, Client *cli, std::string line);
 void	handle_kick(Server &serv, Client *cli, std::string line);
-void	handle_inivte(Server &serv, Client *cli, std::string line);
+void	handle_invite(Server &serv, Client *cli, std::string line);
 void	handle_topic(Server &serv, Client *cli, std::string line);
 void	handle_mode(Server &serv, Client *cli, std::string line);

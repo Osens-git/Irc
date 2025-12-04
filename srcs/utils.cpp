@@ -6,11 +6,16 @@
 /*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/28 16:10:29 by vluo              #+#    #+#             */
-/*   Updated: 2025/12/03 19:37:07 by vluo             ###   ########.fr       */
+/*   Updated: 2025/12/04 14:21:39 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "irc.hpp"
+
+std::string get_fullnick(Client *vicli)
+{
+	return (vicli->get_nick() + "!" + vicli->get_usrname() + "@" + vicli->get_host());
+}
 
 /*
 When the command is successful return no code except -> :<nick> <cmd> :<arg>
@@ -27,9 +32,9 @@ Exemple :
 */
 std::string	return_cmd_success(Client *cli, std::string cmd, std::string arg)
 {
-	std::string nick = cli->get_nick();
-	char buf[6 + nick.size() + cmd.size() + arg.size()];
-	sprintf(buf, ":%s %s :%s\n", nick.c_str(), cmd.c_str(), arg.c_str());
+	std::string full_nick = get_fullnick(cli);
+	char buf[6 + full_nick.size() + cmd.size() + arg.size()];
+	sprintf(buf, ":%s %s :%s\n", full_nick.c_str(), cmd.c_str(), arg.c_str());
 	return (buf);
 }
 
@@ -53,11 +58,15 @@ Exemple:
 */
 std::string	return_cmd_failure(Client *cli, int code, std::string arg, std::string msg)
 {
-	char buf[25 + cli->get_nick().size() + arg.size() + msg.size()];
+	std::string full_nick("");
+	if (cli->get_nick() != "")
+		full_nick = get_fullnick(cli);
+
+	char buf[25 + full_nick.size() + arg.size() + msg.size()];
 	if (cli->get_nick() == "")
 		sprintf(buf, ":ircserv %03d %s:%s\n", code, arg.c_str(), msg.c_str());
 	else
-		sprintf(buf, ":ircserv %03d %s %s:%s\n", code, cli->get_nick().c_str(), arg.c_str(), msg.c_str());
+		sprintf(buf, ":ircserv %03d %s %s:%s\n", code, full_nick.c_str(), arg.c_str(), msg.c_str());
 	return (buf);
 }
 

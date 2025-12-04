@@ -6,7 +6,7 @@
 /*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/29 13:16:43 by vluo              #+#    #+#             */
-/*   Updated: 2025/12/04 13:54:58 by vluo             ###   ########.fr       */
+/*   Updated: 2025/12/04 14:29:11 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -157,13 +157,16 @@ void	handle_quit(Server &serv, Client *cli, std::string line)
 	unsigned long pos = line.find(" ");
 	std::string quit_msg("");
 	if (pos != std::string::npos)
-		quit_msg = line.substr(pos);
+		quit_msg = line.substr(pos + 1);
+	if (quit_msg[0] == ':')
+		quit_msg.erase(0, 1);
 	for (std::vector<std::string>::iterator it = cli->chans.begin(); it < cli->chans.end(); it ++)
 	{
-		std::string msg = return_cmd_success(cli, "QUIT", *it + quit_msg);
+		std::string msg = return_cmd_success(cli, "QUIT", quit_msg);
 		Channel *ch = serv.get_Channel_by_name(*it);
 		ch->rmMember(cli);
 		ch->broadcast(msg, cli->get_fd());
+		std::cout << msg << std::endl;
 	}
 	cli->chans.clear();
 	std::string msg = return_cmd_success(cli, "QUIT", quit_msg);

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   commands.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: earnera <earnera@student.42.fr>            +#+  +:+       +#+        */
+/*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/29 13:16:43 by vluo              #+#    #+#             */
-/*   Updated: 2025/12/04 14:48:40 by earnera          ###   ########.fr       */
+/*   Updated: 2025/12/04 15:27:43 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -302,7 +302,11 @@ static void kick_from_1chan(Server &serv, Client *cli, std::string ch_name, std:
 			send_fail(cli, 441, *it + " " + ch_name + " ", "They aren't on that channel");
 			continue ;
 		}
-		std::string msg = return_cmd_success(cli, "KICK " + ch_name, *it + kick_msg);
+		std::string msg;
+		if (kick_msg == "")
+			msg = return_cmd_success(cli, "KICK " + ch_name + " " + *it, cli->get_nick());
+		else
+			msg = return_cmd_success(cli, "KICK " + ch_name + " " + *it, kick_msg);
 		std::cout << "msg: |" << msg << std::endl;
 		ch->broadcast(msg, -1);
 		ch->rmMember(usr);
@@ -339,7 +343,11 @@ void	kick_chs_usrs(Server &serv, Client *cli, std::vector<std::string> kick_chan
 			send_fail(cli, 441, kick_users[u] + " " + ch->getName() + " ", "They aren't on that channel");
 			continue;
 		}
-		std::string msg = return_cmd_success(cli, "KICK " + ch->getName(), usr->get_nick() + " " + kick_msg);
+		std::string msg;
+		if (kick_msg == "")
+			msg = return_cmd_success(cli, "KICK " + ch->getName() + " " + usr->get_nick(), cli->get_nick());
+		else
+			msg = return_cmd_success(cli, "KICK " + ch->getName() + " " + usr->get_nick(), kick_msg);
 		ch->broadcast(msg, cli->get_fd());
 		ch->rmMember(usr);
 		usr->delete_channel(*it);
@@ -360,9 +368,12 @@ void	handle_kick(Server &serv, Client *cli, std::string line)
 	std::string kick_msg("");
 	if (args.size() > 3)
 	{
-		for (unsigned long i = 3 ; i < args.size(); i ++)
-			kick_msg.append(" " + args[i]);
+		for (unsigned long i = 3 ; i < args.size() - 1; i ++)
+			kick_msg.append(args[i]);
 	}
+	kick_msg.append(args[args.size() - 1]);
+	if (kick_msg[0] == ':')
+		kick_msg.erase(0, 1);
 
 	if (kick_chans.size() != kick_users.size() && kick_chans.size() != 1)
 		return (send_fail(cli, 461, "KICK ", "Not enough parameters"));

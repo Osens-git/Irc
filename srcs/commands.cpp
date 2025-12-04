@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   commands.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: earnera <earnera@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/29 13:16:43 by vluo              #+#    #+#             */
-/*   Updated: 2025/12/04 14:40:27 by vluo             ###   ########.fr       */
+/*   Updated: 2025/12/04 14:48:40 by earnera          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -151,6 +151,7 @@ void	handle_ping(Client* cli, const std::vector<std::string>& cmd)
 	send(cli->get_fd(), msg.c_str(), msg.size(), 0);
 	std::cout << msg << std::endl;
 }
+
 
 void	handle_quit(Server &serv, Client *cli, std::string line)
 {

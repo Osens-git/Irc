@@ -6,7 +6,7 @@
 /*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/29 13:16:43 by vluo              #+#    #+#             */
-/*   Updated: 2025/12/04 13:29:14 by vluo             ###   ########.fr       */
+/*   Updated: 2025/12/04 13:54:58 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -133,7 +133,7 @@ void handle_user(Server &serv, Client* cli, const std::vector<std::string>& cmd)
 		serv.register_client(cli);
 }
 
-void	handle_ping(Server &serv, Client* cli, const std::vector<std::string>& cmd)
+void	handle_ping(Client* cli, const std::vector<std::string>& cmd)
 {
 	if (cmd.size() < 2)
 		return (send_fail(cli, 409, "", "No origin specified"));
@@ -147,8 +147,9 @@ void	handle_ping(Server &serv, Client* cli, const std::vector<std::string>& cmd)
 	if (s2 != "" && s2 != "ircserv")
 		return (send_fail(cli, 402, s1 + " ", "No such server"));
 
-	std::cout << "PONG ircserv" << std::endl;
-	(void)serv;
+	std::string msg = return_cmd_success(cli, "PONG ircserv" , "ircserv");
+	send(cli->get_fd(), msg.c_str(), msg.size(), 0);
+	std::cout << msg << std::endl;
 }
 
 void	handle_quit(Server &serv, Client *cli, std::string line)

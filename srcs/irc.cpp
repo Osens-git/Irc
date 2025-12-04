@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   irc.cpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: earnera <earnera@student.42.fr>            +#+  +:+       +#+        */
+/*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 18:50:29 by vluo              #+#    #+#             */
-/*   Updated: 2025/12/04 14:49:48 by earnera          ###   ########.fr       */
+/*   Updated: 2025/12/04 14:59:14 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,15 +35,15 @@ int	check_iscmd(Server &serv, Client *cli, std::string line)
 	std::string cmd = to_upper(cmd_vec[0]);
 
 	if (cmd == "PASS")
-		handle_pass(serv, cli, cmd_vec);
+		return (handle_pass(serv, cli, cmd_vec), 0);
 	else if (cmd == "NICK")
-		handle_nick(serv, cli, cmd_vec);
+		return (handle_nick(serv, cli, cmd_vec), 0);
 	else if (cmd == "USER")
-		handle_user(serv, cli, cmd_vec);
+		return (handle_user(serv, cli, cmd_vec), 0);
 	else if (cmd == "PING")
-		handle_ping(cli, cmd_vec);
+		return (handle_ping(cli, cmd_vec), 0);
 	else if (cmd == "CAP")
-		return 0 ;
+		return (0);
 
 	if (!cli->_registered && cmd != "PASS" && cmd != "NICK" && cmd != "USER")
 	{
@@ -53,20 +53,22 @@ int	check_iscmd(Server &serv, Client *cli, std::string line)
 
 	if (cmd == "QUIT")
 		return (handle_quit(serv, cli, line), 1);
-	if (cmd == "JOIN")
+	else if (cmd == "JOIN")
 		handle_join(serv, cli, line);
-	if (cmd == "PART")
+	else if (cmd == "PART")
 		handle_part(serv, cli, line);
-	if (cmd == "PRIVMSG")
+	else if (cmd == "PRIVMSG")
 		handle_privmsg(serv, cli, line);
-	if (cmd == "KICK")
+	else if (cmd == "KICK")
 		handle_kick(serv, cli, line);
-	if (cmd == "INVITE")
+	else if (cmd == "INVITE")
 		handle_invite(serv, cli, line);
-	if (cmd == "TOPIC")
+	else if (cmd == "TOPIC")
 		handle_topic(serv, cli, line);
-	if (cmd == "MODE")
+	else if (cmd == "MODE")
 		handle_mode(serv, cli, line);
+	else 
+		return (send_fail(cli, 421, cmd + " ", "Unkwon command"), 0);
 
 	return (0);
 }

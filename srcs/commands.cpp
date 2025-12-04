@@ -6,7 +6,7 @@
 /*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/29 13:16:43 by vluo              #+#    #+#             */
-/*   Updated: 2025/12/03 19:36:43 by vluo             ###   ########.fr       */
+/*   Updated: 2025/12/04 13:29:14 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -131,6 +131,24 @@ void handle_user(Server &serv, Client* cli, const std::vector<std::string>& cmd)
 	cli->_has_user = true;
 	if(cli->_has_pass && cli->_has_nick && cli->_has_user)
 		serv.register_client(cli);
+}
+
+void	handle_ping(Server &serv, Client* cli, const std::vector<std::string>& cmd)
+{
+	if (cmd.size() < 2)
+		return (send_fail(cli, 409, "", "No origin specified"));
+
+	std::string s1(cmd[1]);
+	if (s1 != "ircserv")
+		return (send_fail(cli, 402, s1 + " ", "No such server"));
+	std::string s2("");
+	if (cmd.size() > 2)
+		s2 = cmd[2];
+	if (s2 != "" && s2 != "ircserv")
+		return (send_fail(cli, 402, s1 + " ", "No such server"));
+
+	std::cout << "PONG ircserv" << std::endl;
+	(void)serv;
 }
 
 void	handle_quit(Server &serv, Client *cli, std::string line)
@@ -448,6 +466,7 @@ void	handle_mode(Server &serv, Client *cli, std::string line)
 	int stop = mode.size();
 	if (params != "")
 		stop = std::min(mode.size() - 1, (unsigned long)3);
+	std::string final_mode("");
 	for (unsigned long i = 1; i < mode.size(); i ++)
 	{
 		if (mode[i] != 'i' && mode[i] != 't' && mode[i] != 'k' && mode[i] != 'o' && mode[i] != 'l')
@@ -455,16 +474,17 @@ void	handle_mode(Server &serv, Client *cli, std::string line)
 			send_fail(cli, 472, mode[i] + std::string(" "), "is unknown mode char to me for " + args[1]);
 			continue;
 		}
+
 		if (mode[i] == 'i')
 		{
 			ch->setInviteOnly(mode[0] == '+');
-			continue ;
+			final_mode += 'i';
 		}
 
 		if (mode[i] == 't')
 		{
 			ch->setTopicRestricted(mode[0] == '+');
-			continue ;
+			final_mode += 't';
 		}
 
 		if (mode[i] == 'k')
@@ -477,12 +497,12 @@ void	handle_mode(Server &serv, Client *cli, std::string line)
 					continue ;
 				}
 				ch->setKey(params);
-				continue ;
+				final_mode += 'k';
 			}
 			else
 			{
 				ch->setKey("");
-				continue ;
+				final_mode += 'k';
 			}
 		}
 
@@ -497,10 +517,15 @@ void	handle_mode(Server &serv, Client *cli, std::string line)
 				continue ;
 			}
 			if (mode[0] == '+')
+			{
 				ch->addOp(usr);
+				final_mode += 'o';
+			}
 			else
+			{
 				ch->rmOp(usr);
-			continue;
+				final_mode += 'o';
+			}
 		}
 
 		if (mode[i] == 'l')
@@ -516,19 +541,19 @@ void	handle_mode(Server &serv, Client *cli, std::string line)
 				if (limit == 0)
 					continue;
 				ch->setUserLimit(limit);
-				continue ;
+				final_mode += 'l';
 			}
 			else
 			{
 				ch->setUserLimit(-1);
-				continue ;
+				final_mode += 'l';
 			}
 		}
 	}
 	if (params != "")
 		params.insert(0, " ");
 
-	std::string msg_cli = return_cmd_success(cli, "MODE " + args[1], mode.substr(0, stop + 1) + params);
+	std::string msg_cli = return_cmd_success(cli, "MODE " + args[1], final_mode + params);
 	std::cout << msg_cli << std::endl;
 	send(cli->get_fd(), msg_cli.c_str(), msg_cli.size(), 0);
 	ch->broadcast(msg_cli, cli->get_fd());

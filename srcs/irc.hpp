@@ -6,7 +6,7 @@
 /*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 18:50:55 by vluo              #+#    #+#             */
-/*   Updated: 2025/12/03 19:34:13 by vluo             ###   ########.fr       */
+/*   Updated: 2025/12/04 13:19:04 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,7 @@ int							good_ch_mask(std::string name, Client *cli);
 void	handle_pass(Server &serv, Client* cli, const std::vector<std::string>& cmd);
 void	handle_nick(Server &serv, Client* cli, const std::vector<std::string>& cmd);
 void	handle_user(Server &serv, Client* cli, const std::vector<std::string>& cmd);
+void	handle_ping(Server &serv, Client *cli, const std::vector<std::string>& cmd);
 void	handle_quit(Server &serv, Client *cli, std::string line);
 void	handle_join(Server &serv, Client *cli, std::string line);
 void	handle_part(Server &serv, Client *cli, std::string line);

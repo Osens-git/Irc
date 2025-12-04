@@ -6,7 +6,7 @@
 /*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 18:50:29 by vluo              #+#    #+#             */
-/*   Updated: 2025/12/03 19:32:28 by vluo             ###   ########.fr       */
+/*   Updated: 2025/12/04 13:30:14 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,8 @@ int	check_iscmd(Server &serv, Client *cli, std::string line)
 		handle_nick(serv, cli, cmd_vec);
 	else if (cmd == "USER")
 		handle_user(serv, cli, cmd_vec);
+	else if (cmd == "PING")
+		handle_ping(serv, cli, cmd_vec);
 
 	if (!cli->_registered && cmd != "PASS" && cmd != "NICK" && cmd != "USER")
 	{

@@ -6,7 +6,7 @@
 /*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 18:50:29 by vluo              #+#    #+#             */
-/*   Updated: 2025/12/04 14:59:14 by vluo             ###   ########.fr       */
+/*   Updated: 2025/12/05 10:47:22 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,8 +26,6 @@ int	check_args(char **argv){
 
 int	check_iscmd(Server &serv, Client *cli, std::string line)
 {
-	std::cout << line << std::endl;
-
 	std::vector<std::string> cmd_vec = split(line, ' ');
 	if (cmd_vec.empty())
 		return (0);

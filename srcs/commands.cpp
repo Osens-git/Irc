@@ -6,7 +6,7 @@
 /*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/29 13:16:43 by vluo              #+#    #+#             */
-/*   Updated: 2025/12/04 15:27:43 by vluo             ###   ########.fr       */
+/*   Updated: 2025/12/05 11:51:07 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,8 +76,6 @@ void handle_pass(Server &serv, Client* cli, const std::vector<std::string>& cmd)
 
 void handle_nick(Server &serv, Client* cli, const std::vector<std::string>& cmd)
 {
-	print_parse(cmd);
-
 	if (cmd.size() < 2 || cmd[1].empty())
 	{
 		send_fail(cli, 431, "", "No nickname given");
@@ -149,7 +147,6 @@ void	handle_ping(Client* cli, const std::vector<std::string>& cmd)
 
 	std::string msg = return_cmd_success(cli, "PONG ircserv" , "ircserv");
 	send(cli->get_fd(), msg.c_str(), msg.size(), 0);
-	std::cout << msg << std::endl;
 }
 
 
@@ -211,9 +208,6 @@ void	handle_join(Server &serv, Client *cli, std::string line)
 
 void	handle_part(Server &serv, Client *cli, std::string line)
 {
-
-	std::cout << line << std::endl;
-
 	std::vector<std::string> args;
 	std::string leaving_msg("");
 	std::size_t pos = line.find(':');
@@ -307,7 +301,6 @@ static void kick_from_1chan(Server &serv, Client *cli, std::string ch_name, std:
 			msg = return_cmd_success(cli, "KICK " + ch_name + " " + *it, cli->get_nick());
 		else
 			msg = return_cmd_success(cli, "KICK " + ch_name + " " + *it, kick_msg);
-		std::cout << "msg: |" << msg << std::endl;
 		ch->broadcast(msg, -1);
 		ch->rmMember(usr);
 		usr->delete_channel(ch_name);
@@ -333,7 +326,7 @@ void	kick_chs_usrs(Server &serv, Client *cli, std::vector<std::string> kick_chan
 			continue ;
 		if (!ch->ismember(cli))
 		{
-			send_fail(cli, 442, *it + " ", "You're not on that channel");
+			send_fail(cli, 442, *it + " ", "You're not on that channel");                                
 			continue ;
 		}
 
@@ -356,9 +349,6 @@ void	kick_chs_usrs(Server &serv, Client *cli, std::vector<std::string> kick_chan
 
 void	handle_kick(Server &serv, Client *cli, std::string line)
 {
-
-	std::cout << "buf : |" << line << std::endl;
-
 	std::vector<std::string> args = split(line, ' ');
 	if (!enough_params(args, cli, 2))
 		return ;
@@ -432,7 +422,6 @@ void	handle_topic(Server &serv, Client *cli, std::string line)
 		if (ch->getTopic() == "")
 		{
 			std::string msg = return_msg_info(331, cli->get_nick(), args[1] + " :" "No topic is set");
-			std::cout << msg << std::endl;
 			send(cli->get_fd(), msg.c_str(), msg.size(), 0);
 			return ;
 		}
@@ -474,9 +463,6 @@ void	handle_mode(Server &serv, Client *cli, std::string line)
 		return ;
 	if (mode.size() < 2)
 		return (send_fail(cli, 472, std::string(&mode[1]) + " ", "is unknown mode char to me for " + args[1]));
-
-	std::cout << "mode : |" << mode << std::endl;
-	std::cout << "params : |" << params << std::endl;
 
 	int stop = mode.size();
 	if (params != "")
@@ -549,7 +535,7 @@ void	handle_mode(Server &serv, Client *cli, std::string line)
 			{
 				if (params == "")
 				{
-					send_fail(cli, 461, "MODE +l ", "Not enought parameters");
+					send_fail(cli, 461, "MODE +l ", "Not enough parameters");
 					continue ;
 				}
 				int limit = std::atoi(params.c_str());
@@ -565,11 +551,15 @@ void	handle_mode(Server &serv, Client *cli, std::string line)
 			}
 		}
 	}
+	if (final_mode != "")
+		final_mode = mode[0] + final_mode;
 	if (params != "")
 		params.insert(0, " ");
 
-	std::string msg_cli = return_cmd_success(cli, "MODE " + args[1], final_mode + params);
-	std::cout << msg_cli << std::endl;
-	send(cli->get_fd(), msg_cli.c_str(), msg_cli.size(), 0);
-	ch->broadcast(msg_cli, cli->get_fd());
+	if (params != "" || final_mode != "")
+	{
+		std::string msg_cli = return_cmd_success(cli, "MODE " + args[1], final_mode + params);
+		send(cli->get_fd(), msg_cli.c_str(), msg_cli.size(), 0);
+		ch->broadcast(msg_cli, cli->get_fd());
+	}
 }

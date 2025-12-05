@@ -6,7 +6,7 @@
 /*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/28 16:10:29 by vluo              #+#    #+#             */
-/*   Updated: 2025/12/04 14:21:39 by vluo             ###   ########.fr       */
+/*   Updated: 2025/12/05 10:48:27 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,15 +89,6 @@ std::string	return_msg_info(int code, std::string cmd, std::string msg)
 	return (buf);
 }
 
-void	print_parse(std::vector<std::string> parse)
-{
-	std::cout << "SIZE : " << parse.size() << std::endl;
-	std::cout << "PARSING : ";
-	for (unsigned long i = 0; i < parse.size(); i ++)
-		std::cout << "|" << parse[i] << "| ";
-	std::cout << "END" << std::endl;	
-}
-
 std::vector<std::string> split(std::string cmds, char delimiter)
 {
 	int deb = 0;
@@ -114,8 +105,6 @@ std::vector<std::string> split(std::string cmds, char delimiter)
 	if (cmds.size() - deb > 0)
 		parse.push_back(cmds.substr(deb, cmds.size() - deb));
 
-	// print_parse(parse);
-
 	return (parse);
 }
 
@@ -123,7 +112,6 @@ void	send_fail(Client *cli, int code, std::string arg, std::string msg)
 {
 	std::string rtr = return_cmd_failure(cli, code, arg, msg);
 	send(cli->get_fd(), rtr.c_str(), rtr.size(), 0);
-	std::cout << rtr ;
 }
 
 std::string	to_upper(std::string str)
@@ -168,7 +156,6 @@ int	good_ch_mask(std::string name, Client *cli)
 		if (name[i] == 7)
 		{
 			std::string msg = return_cmd_failure(cli, 476, name + " ", "Bad Channel Mask");
-			std::cout << msg << std::endl;
 			send(cli->get_fd(), msg.c_str(), msg.size(), 0);
 			return (0);
 		}

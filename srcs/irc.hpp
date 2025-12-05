@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   irc.hpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: earnera <earnera@student.42.fr>            +#+  +:+       +#+        */
+/*   By: vluo <vluo@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 18:50:55 by vluo              #+#    #+#             */
-/*   Updated: 2025/12/04 14:54:21 by earnera          ###   ########.fr       */
+/*   Updated: 2025/12/05 10:44:25 by vluo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,6 @@
 std::string					return_cmd_success(Client *cli, std::string cmd, std::string arg);
 std::string					return_cmd_failure(Client *cli, int code, std::string arg, std::string msg);
 std::string					return_msg_info(int code, std::string cmd, std::string msg);
-void						print_parse(std::vector<std::string> parse); // to delete later
 std::vector<std::string>	split(std::string cmds, char delimiter);
 void						send_fail(Client *cli, int code, std::string arg, std::string msg);
 std::string					to_upper(std::string str);
